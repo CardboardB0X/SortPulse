@@ -24,11 +24,14 @@ This repository contains the complete codebase, launch scripts, font assets, tec
 
 * **Five Unique Algorithm Modes:** Manually drive the step-by-step logic of Selection, Bubble, Insertion, Quick, and Merge Sort.
 * **Dual Aesthetics & Theme Engine:** Toggle between the vibrant **Classic Neon** (default) or the retro **GameBoy Retro** (desaturated DMG LCD color palette with grayscale anti-aliasing for crisp text).
+* **Retro CRT Scanlines & Vignette:** Optional post-processing filter (`[C]`) drawing simulated horizontal CRT phosphors and edge vignetting.
+* **Dynamic Screen Shake Engine:** Procedural physics screen-shake impulses triggering on mistakes, high combo runs, and wave clears for visceral arcade game feel.
+* **Hybrid Keyboard & Mouse Controls:** Play with `[A]`/`[D]`, Arrow Keys, Spacebar, or directly click and hover blocks on the canvas.
+* **Audio Controls & Procedural Synth:** 8-bit dynamic runtime synthesizer with master volume slider and instant mute toggle (`[M]`).
 * **Tutorial Overlay Visual Guides:** Interactive, step-by-step animated previews for all five algorithms to help players learn the mechanics before starting.
 * **Practice Mode:** Train with zero timer pressure or penalty calculations.
 * **Combo Multiplier System:** Stack consecutive correct moves to trigger score multipliers and pulsing visual indicators.
 * **Juicy Vector Particle Engine:** Custom physics particle bursts erupting on correct/incorrect actions, plus falling confetti cascades on wave completion.
-* **Procedural Synth Soundtrack:** An 8-bit background chiptune track synthesized entirely in code at runtime. Melodic pacing and tempo speed up dynamically under time pressure.
 * **High Score Leaderboard:** Automatically saves and displays top 5 runs for each algorithm mode locally in `sort_pulse_scores.txt`.
 * **Crisp Font Rendering:** Enforces integer-size loading and caching for pixel-art fonts ("Press Start 2P") to prevent high-DPI scaling blurriness.
 * **One-Click Native Executable:** Standalone packaging script that bundles a custom JRE and JavaFX modules, allowing click-and-play without external JDK installations.
@@ -113,6 +116,21 @@ graph TD
 * Enable this by checking the **PRACTICE MODE (NO TIMER)** box on the main menu.
 * The timer displays **PRACTICE** and will not count down.
 * All time and score penalties on incorrect actions are disabled, letting you learn the algorithm at your own pace.
+* **Step-Back / Undo (`[Z]`):** Made an accidental move or want to review a step? Press `Z` to instantly rewind the puzzle state, step counter, and selection cursor to the previous step with full visual feedback.
+
+---
+
+### 📊 Educational Analytics & Algorithmic Report Card
+
+* **Live HUD Metrics:** Real-time tracking of:
+  * **Algorithm Complexity:** Live Big-O notation indicator ($O(n \log n)$, $O(n^2)$).
+  * **Live Accuracy & Grade:** Real-time accuracy percentage and responsive performance grade badge (`S`, `A`, `B`, `C`, `D`).
+  * **Operation Counter:** Total valid algorithmic swaps and partition assignments executed.
+  * **Practice Step Tracker:** Exact current step vs. total steps required to sort the wave (`STEP: X / Total`).
+* **Post-Match Algorithmic Report Card:**
+  * **Proficiency Rank Badge:** Displays calculated rank based on speed and algorithmic precision.
+  * **Deep Decision Stats:** Summarizes total swaps, mistakes, net accuracy percentage, and average decision time per move (in milliseconds).
+  * **Local High Scores:** Persistent Top 5 local leaderboard per session.
 
 ---
 
@@ -126,15 +144,22 @@ graph TD
 
 ---
 
-### ⌨️ Game Controls
+### ⌨️ Controls & Input Schemes
 
-| Key | Gameplay Action | Visual Guide Action |
+Sort Pulse supports both full keyboard controls and direct mouse interactions:
+
+| Control | Gameplay Action | Visual Guide Action |
 |---|---|---|
 | `A` / `←` | Move Selection Cursor Left | Navigate to Previous Slide |
 | `D` / `→` | Move Selection Cursor Right | Navigate to Next Slide / Start Game |
-| `ENTER` | Select / Execute Shift Action | Start Game (on final slide) |
-| `ESC` | Return to Menu (retains fullscreen) | Close Tutorial Overlay |
-| `R` | Restart Game (when Game Over) | — |
+| `ENTER` / `SPACE` | Execute Shift / Swap Action | Start Game (on final slide) |
+| `Z` | Undo last move (Practice Mode step-back) | — |
+| **Mouse Hover** | Highlight block under cursor with soft glow | — |
+| **Mouse Left-Click** | Click block to select; click selected block to execute | Click navigation buttons |
+| `M` | Toggle Audio Mute / Unmute instantly | — |
+| `C` | Toggle Retro CRT Scanlines & Vignette | — |
+| `ESC` | Open Pause Menu (Volume, Mute, CRT, Restart, Leave) | Close Tutorial Overlay |
+| `R` | Restart current match/wave | — |
 
 ---
 

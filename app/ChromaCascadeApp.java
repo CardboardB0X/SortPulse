@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -16,6 +17,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -268,6 +270,29 @@ public class ChromaCascadeApp extends Application {
         private static boolean mixerRunning = false;
         private static SourceDataLine mixerLine;
 
+        private static volatile double masterVolume = 0.8;
+        private static volatile boolean soundMuted = false;
+
+        public static void setMasterVolume(double vol) {
+            masterVolume = Math.max(0.0, Math.min(1.0, vol));
+        }
+
+        public static double getMasterVolume() {
+            return masterVolume;
+        }
+
+        public static void toggleMute() {
+            soundMuted = !soundMuted;
+        }
+
+        public static void setMuted(boolean m) {
+            soundMuted = m;
+        }
+
+        public static boolean isMuted() {
+            return soundMuted;
+        }
+
         static {
             startMixer();
         }
@@ -329,6 +354,15 @@ public class ChromaCascadeApp extends Application {
                                     rightSum += sampleVal * rightFactor;
                                     tone.remainingSamples--;
                                 }
+                            }
+
+                            // Volume and Mute control
+                            if (soundMuted) {
+                                leftSum = 0.0;
+                                rightSum = 0.0;
+                            } else {
+                                leftSum *= masterVolume;
+                                rightSum *= masterVolume;
                             }
 
                             // Clamp to prevent digital clipping
@@ -731,6 +765,61 @@ public class ChromaCascadeApp extends Application {
         private int startCountdown = -1; // -1 means inactive, 3, 2, 1, 0 are countdown states
 
         private String activeThemeName = "Classic Neon";
+
+        // Performance & Analytics Metrics
+        private int totalCorrectMoves = 0;
+        private int totalIncorrectMoves = 0;
+        private long roundStartTime = 0;
+        private long lastMoveTimestamp = 0;
+        private java.util.List<Long> decisionTimeDeltas = new java.util.ArrayList<>();
+
+        // Practice Mode Undo Snapshot
+        public static class UndoSnapshot {
+            public final int[] values;
+            public final int stepIndex;
+            public final int cursorIndex;
+
+            public UndoSnapshot(int[] values, int stepIndex, int cursorIndex) {
+                this.values = values;
+                this.stepIndex = stepIndex;
+                this.cursorIndex = cursorIndex;
+            }
+        }
+        private java.util.Deque<UndoSnapshot> undoStack = new java.util.ArrayDeque<>();
+
+        public java.util.Deque<UndoSnapshot> getUndoStack() { return undoStack; }
+        public int getTotalCorrectMoves() { return totalCorrectMoves; }
+        public void setTotalCorrectMoves(int v) { this.totalCorrectMoves = v; }
+        public int getTotalIncorrectMoves() { return totalIncorrectMoves; }
+        public void setTotalIncorrectMoves(int v) { this.totalIncorrectMoves = v; }
+        public long getRoundStartTime() { return roundStartTime; }
+        public void setRoundStartTime(long t) { this.roundStartTime = t; }
+        public long getLastMoveTimestamp() { return lastMoveTimestamp; }
+        public void setLastMoveTimestamp(long t) { this.lastMoveTimestamp = t; }
+        public java.util.List<Long> getDecisionTimeDeltas() { return decisionTimeDeltas; }
+
+        public double getAccuracyRate() {
+            int total = totalCorrectMoves + totalIncorrectMoves;
+            if (total == 0) return 100.0;
+            return (double) totalCorrectMoves / total * 100.0;
+        }
+
+        public long getAverageDecisionTimeMs() {
+            if (decisionTimeDeltas.isEmpty()) return 0;
+            long sum = 0;
+            for (long d : decisionTimeDeltas) sum += d;
+            return sum / decisionTimeDeltas.size();
+        }
+
+        public String getPerformanceGrade() {
+            double acc = getAccuracyRate();
+            long avgMs = getAverageDecisionTimeMs();
+            if (acc >= 95.0 && (avgMs < 1500 || decisionTimeDeltas.isEmpty())) return "S";
+            if (acc >= 85.0) return "A";
+            if (acc >= 75.0) return "B";
+            if (acc >= 65.0) return "C";
+            return "D";
+        }
 
         public String getActiveThemeName() {
             return activeThemeName;
@@ -1417,6 +1506,68 @@ public class ChromaCascadeApp extends Application {
         private Canvas pixelateCanvas;
         private GraphicsContext pixelateGc;
 
+        private double shakeIntensity = 0.0;
+        private double shakeDecay = 0.86;
+        private Random shakeRandom = new Random();
+        private boolean crtEnabled = false;
+        private int hoveredIndex = -1;
+
+        public void triggerScreenShake(double intensity) {
+            this.shakeIntensity = Math.max(this.shakeIntensity, intensity);
+        }
+
+        public void setCrtEnabled(boolean enabled) {
+            this.crtEnabled = enabled;
+        }
+
+        public boolean isCrtEnabled() {
+            return this.crtEnabled;
+        }
+
+        public void toggleCrt() {
+            this.crtEnabled = !this.crtEnabled;
+        }
+
+        public int getHoveredIndex() {
+            return hoveredIndex;
+        }
+
+        public void setHoveredIndex(int hoveredIndex) {
+            this.hoveredIndex = hoveredIndex;
+        }
+
+        public int getBlockIndexAt(double mouseX, double mouseY) {
+            PuzzleRow row = model.getPuzzleRow();
+            if (row == null || row.getCurrentSet() == null) return -1;
+            int size = row.getCurrentSet().length;
+            if (size <= 0) return -1;
+
+            double totalWidth = 700.0;
+            double boxHeight = 85.0;
+            double boxWidth = totalWidth / size;
+            double startX = (canvas.getWidth() - totalWidth) / 2.0;
+            double startY = (canvas.getHeight() - boxHeight) / 2.0;
+
+            String targetAlgo = model.getTargetAlgorithm();
+            if (targetAlgo.equalsIgnoreCase("Merge Sort")) {
+                if (mouseY < startY - 90 || mouseY > startY + 60 + boxHeight + 30) {
+                    return -1;
+                }
+            } else {
+                if (mouseY < startY - 30 || mouseY > startY + boxHeight + 30) {
+                    return -1;
+                }
+            }
+
+            if (mouseX >= startX && mouseX <= startX + totalWidth) {
+                int idx = (int) ((mouseX - startX) / boxWidth);
+                if (idx >= 0 && idx < size) {
+                    return idx;
+                }
+            }
+            return -1;
+        }
+
         public ChromaCascadeView(ChromaCascadeModel model) {
             this.model = model;
             this.canvas = new Canvas(800, 400);
@@ -1474,6 +1625,23 @@ public class ChromaCascadeApp extends Application {
         public void draw() {
             Theme theme = model.getTheme();
             boolean isGameBoy = theme.name.equalsIgnoreCase("GameBoy Retro");
+
+            // Calculate screen shake offset
+            double offsetX = 0.0;
+            double offsetY = 0.0;
+            if (shakeIntensity > 0.4) {
+                offsetX = (shakeRandom.nextDouble() * 2.0 - 1.0) * shakeIntensity;
+                offsetY = (shakeRandom.nextDouble() * 2.0 - 1.0) * shakeIntensity;
+                shakeIntensity *= shakeDecay;
+                if (shakeIntensity < 0.4) {
+                    shakeIntensity = 0.0;
+                }
+            }
+
+            gc.save();
+            if (offsetX != 0.0 || offsetY != 0.0) {
+                gc.translate(offsetX, offsetY);
+            }
 
             // Draw background
             gc.setFill(theme.bg);
@@ -1679,6 +1847,11 @@ public class ChromaCascadeApp extends Application {
                         gc.setStroke(theme.accent);
                         gc.setLineWidth(2.5);
                         gc.strokeRoundRect(x - 1, y - 1, w + 2, h + 2, 4, 4);
+                    } else if (i == hoveredIndex && model.getFreezeFrames() <= 0) {
+                        // Mouse hover highlight
+                        gc.setStroke(theme.accent.deriveColor(0, 1, 1, 0.45));
+                        gc.setLineWidth(1.8);
+                        gc.strokeRoundRect(x - 1, y - 1, w + 2, h + 2, 4, 4);
                     }
 
                     // Draw Badges above blocks
@@ -1873,31 +2046,52 @@ public class ChromaCascadeApp extends Application {
                     gc.setFill(theme.panelBg.deriveColor(0, 1, 1, 0.98));
                     gc.fillRoundRect(160, 50, 480, 300, 8, 8);
 
-                    // Title
+                    // Title & Grade Badge
                     gc.setFill(isGameBoy ? theme.accent : Color.web("#ef4444"));
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 22, isGameBoy));
-                    String title = "TIME EXPIRED";
-                    double expiredCharW = isGameBoy ? 8.0 : 6.5;
-                    gc.fillText(title, 400 - (title.length() * expiredCharW), 90);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 20, isGameBoy));
+                    String title = model.isPracticeMode() ? "PRACTICE COMPLETE" : "TIME EXPIRED";
+                    double expiredCharW = isGameBoy ? 7.5 : 6.0;
+                    gc.fillText(title, 370 - (title.length() * expiredCharW), 80);
 
-                    // Subtitle
+                    // Grade Badge Box
+                    String grade = model.getPerformanceGrade();
+                    Color gradeCol = grade.equals("S") ? Color.web("#fbbf24") : (grade.equals("A") ? Color.web("#10b981") : (grade.equals("B") ? Color.web("#3b82f6") : Color.web("#f97316")));
+                    gc.setFill(theme.panelBg);
+                    gc.setStroke(gradeCol);
+                    gc.setLineWidth(1.8);
+                    gc.fillRoundRect(555, 62, 68, 24, 4, 4);
+                    gc.strokeRoundRect(555, 62, 68, 24, 4, 4);
+                    gc.setFill(gradeCol);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 10, isGameBoy));
+                    gc.fillText("RANK " + grade, 562, 78);
+
+                    // Performance Report Card Subtitle
                     gc.setFill(theme.text);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 13, isGameBoy));
-                    String sub = "Final Score: " + model.getScore() + " | Completed Waves: " + model.getCompletedWavesCount();
-                    double expiredSubW = isGameBoy ? 5.0 : 4.0;
-                    gc.fillText(sub, 400 - (sub.length() * expiredSubW), 115);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 11, isGameBoy));
+                    String sub = String.format("Score: %d | Waves: %d | Accuracy: %.1f%% | Avg Time: %dms", 
+                        model.getScore(), model.getCompletedWavesCount(), model.getAccuracyRate(), model.getAverageDecisionTimeMs());
+                    double expiredSubW = isGameBoy ? 4.5 : 3.5;
+                    gc.fillText(sub, 400 - (sub.length() * expiredSubW), 104);
+
+                    // Mini Operations Summary
+                    gc.setFill(theme.textMuted);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                    String opsStr = String.format("TOTAL SWAPS: %d  |  CORRECT: %d  |  MISTAKES: %d", 
+                        model.getTotalCorrectMoves(), model.getTotalCorrectMoves(), model.getTotalIncorrectMoves());
+                    double opsW = isGameBoy ? 4.0 : 3.0;
+                    gc.fillText(opsStr, 400 - (opsStr.length() * opsW), 122);
 
                     // Headers
                     gc.setFill(theme.textMuted);
                     gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 11, isGameBoy));
-                    gc.fillText("RANK", 190, 145);
-                    gc.fillText("NAME", 260, 145);
-                    gc.fillText("SCORE", 380, 145);
-                    gc.fillText("DATE", 490, 145);
+                    gc.fillText("RANK", 190, 148);
+                    gc.fillText("NAME", 260, 148);
+                    gc.fillText("SCORE", 380, 148);
+                    gc.fillText("DATE", 490, 148);
 
                     gc.setStroke(theme.border);
                     gc.setLineWidth(1.0);
-                    gc.strokeLine(180, 153, 620, 153);
+                    gc.strokeLine(180, 155, 620, 155);
 
                     // Render Top 5 Scores
                     java.util.List<LeaderboardManager.Entry> top = LeaderboardManager.getTopScores(model.getTargetAlgorithm(), 5);
@@ -2017,6 +2211,31 @@ public class ChromaCascadeApp extends Application {
                 }
             }
 
+            gc.restore();
+
+            // CRT Scanlines and Vignette overlay
+            if (crtEnabled) {
+                double w = canvas.getWidth();
+                double h = canvas.getHeight();
+
+                // 1. Horizontal scanlines
+                gc.setLineWidth(1.0);
+                gc.setStroke(Color.rgb(0, 0, 0, isGameBoy ? 0.16 : 0.24));
+                for (double sy = 0; sy < h; sy += 3) {
+                    gc.strokeLine(0, sy, w, sy);
+                }
+
+                // 2. Corner vignette
+                RadialGradient vignette = new RadialGradient(
+                    0, 0, w / 2.0, h / 2.0, Math.max(w, h) * 0.65, false, CycleMethod.NO_CYCLE,
+                    new Stop(0.0, Color.TRANSPARENT),
+                    new Stop(0.68, Color.TRANSPARENT),
+                    new Stop(1.0, isGameBoy ? Color.rgb(15, 56, 15, 0.40) : Color.rgb(0, 0, 0, 0.55))
+                );
+                gc.setFill(vignette);
+                gc.fillRect(0, 0, w, h);
+            }
+
         }
 
         public void updateHUD() {
@@ -2027,7 +2246,8 @@ public class ChromaCascadeApp extends Application {
 
             if (scoreValLabel != null) {
                 if (model.isPracticeMode()) {
-                    scoreValLabel.setText("PRACTICE MODE (UNTIMED)");
+                    int totalSteps = (model.getSteps() != null) ? model.getSteps().size() : 0;
+                    scoreValLabel.setText(String.format("PRACTICE MODE | STEP: %d/%d [Z: UNDO]", model.getCurrentStep(), totalSteps));
                 } else {
                     int topScore = 0;
                     java.util.List<LeaderboardManager.Entry> top = LeaderboardManager.getTopScores(model.getTargetAlgorithm(), 1);
@@ -2037,9 +2257,11 @@ public class ChromaCascadeApp extends Application {
                     if (model.getScore() > topScore) {
                         topScore = model.getScore();
                     }
-                    scoreValLabel.setText(String.format("SCORE: %05d    HI-SCORE: %05d", model.getScore(), topScore));
+                    double acc = model.getAccuracyRate();
+                    scoreValLabel.setText(String.format("SCORE: %05d   HI: %05d   ACC: %.0f%% [%s]", 
+                        model.getScore(), topScore, acc, model.getPerformanceGrade()));
                 }
-                scoreValLabel.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "10px" : "16px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
+                scoreValLabel.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "10px" : "15px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
             }
             if (timerValLabel != null) {
                 if (model.isPracticeMode()) {
@@ -2061,10 +2283,11 @@ public class ChromaCascadeApp extends Application {
             }
             if (targetValLabel != null) {
                 String modeLabelStr = "MODE: " + model.getTargetAlgorithm().toUpperCase();
+                int totalOps = model.getTotalCorrectMoves() + model.getTotalIncorrectMoves();
                 if (model.isPracticeMode()) {
-                    targetValLabel.setText(modeLabelStr + " [PRACTICE]");
+                    targetValLabel.setText(modeLabelStr + " [PRACTICE] | OPS: " + totalOps);
                 } else {
-                    targetValLabel.setText(modeLabelStr + " | WAVE: " + (model.getCompletedWavesCount() + 1));
+                    targetValLabel.setText(modeLabelStr + " | WAVE: " + (model.getCompletedWavesCount() + 1) + " | OPS: " + totalOps);
                 }
                 targetValLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-text-fill: " + theme.sortedHex + "; -fx-font-weight: bold;");
             }
@@ -2094,6 +2317,12 @@ public class ChromaCascadeApp extends Application {
             model.setScore(0);
             model.setCompletedWavesCount(0);
             model.setStartCountdown(3);
+            model.setTotalCorrectMoves(0);
+            model.setTotalIncorrectMoves(0);
+            model.getDecisionTimeDeltas().clear();
+            model.getUndoStack().clear();
+            model.setRoundStartTime(System.currentTimeMillis());
+            model.setLastMoveTimestamp(0);
             
             int startingTime = 20;
             String targetAlgo = model.getTargetAlgorithm();
@@ -2215,32 +2444,79 @@ public class ChromaCascadeApp extends Application {
 
             switch (code) {
                 case A:
+                case LEFT:
                     int cursorA = model.getActiveSegmentCursor();
                     int prevCursor = cursorA - 1;
                     if (prevCursor < 0) {
                         prevCursor = length - 1;
                     }
                     model.setActiveSegmentCursor(prevCursor);
-                    SoundManager.playClick(-0.35);
+                    double panLeft = ((double) prevCursor / Math.max(1, length - 1)) * 2.0 - 1.0;
+                    SoundManager.playClick(panLeft * 0.4);
                     break;
 
                 case D:
+                case RIGHT:
                     int cursor = model.getActiveSegmentCursor();
                     int nextCursor = cursor + 1;
                     if (nextCursor >= length) {
                         nextCursor = 0;
                     }
                     model.setActiveSegmentCursor(nextCursor);
-                    SoundManager.playClick(0.35);
+                    double panRight = ((double) nextCursor / Math.max(1, length - 1)) * 2.0 - 1.0;
+                    SoundManager.playClick(panRight * 0.4);
                     break;
 
                 case ENTER:
+                case SPACE:
                     executeShiftAction();
+                    break;
+
+                case M:
+                    SoundManager.toggleMute();
+                    view.spawnFloatingText(view.getCanvas().getWidth() / 2, view.getCanvas().getHeight() / 2 - 40, SoundManager.isMuted() ? "AUDIO MUTED" : "AUDIO UNMUTED", Color.web("#f59e0b"));
+                    break;
+
+                case C:
+                    view.toggleCrt();
+                    view.spawnFloatingText(view.getCanvas().getWidth() / 2, view.getCanvas().getHeight() / 2 - 20, view.isCrtEnabled() ? "CRT SCANLINES ON" : "CRT SCANLINES OFF", Color.web("#06b6d4"));
+                    break;
+
+                case Z:
+                    if (model.isPracticeMode()) {
+                        executeUndoAction();
+                    }
                     break;
 
                 default:
                     break;
             }
+        }
+
+        public void executeUndoAction() {
+            if (!model.isPracticeMode() || model.isGameOver() || model.getFreezeFrames() > 0) return;
+            if (model.getUndoStack().isEmpty()) {
+                view.spawnFloatingText(view.getCanvas().getWidth() / 2, view.getCanvas().getHeight() / 2 - 20, "NO STEPS TO UNDO", Color.web("#f59e0b"));
+                SoundManager.playClick();
+                return;
+            }
+            ChromaCascadeModel.UndoSnapshot snap = model.getUndoStack().pop();
+            PuzzleRow row = model.getPuzzleRow();
+            if (row == null || row.getCurrentSet() == null) return;
+            BlockSegment[] set = row.getCurrentSet();
+
+            for (int k = 0; k < Math.min(set.length, snap.values.length); k++) {
+                int v = snap.values[k];
+                BlockSegment seg = (v % 2 != 0) ? new OddSegment(v, k) : new EvenSegment(v, k);
+                row.setSegment(k, seg);
+            }
+
+            model.setCurrentStep(snap.stepIndex);
+            model.setActiveSegmentCursor(snap.cursorIndex);
+            view.clearVisuals();
+            SoundManager.playClick(-0.2);
+            view.spawnFloatingText(view.getCanvas().getWidth() / 2, view.getCanvas().getHeight() / 2 - 30, "STEP REVERTED [Z]", Color.web("#06b6d4"));
+            addLogMessage("UNDO: Step reverted to state " + (snap.stepIndex + 1));
         }
 
         public void triggerGameOver() {
@@ -2269,6 +2545,23 @@ public class ChromaCascadeApp extends Application {
             }
             
             SortingStep step = steps.get(currentStepIdx);
+
+            // Snapshot state for practice mode Undo
+            if (model.isPracticeMode()) {
+                int[] snapVals = new int[set.length];
+                for (int k = 0; k < set.length; k++) {
+                    snapVals[k] = set[k].getRawValue();
+                }
+                model.getUndoStack().push(new ChromaCascadeModel.UndoSnapshot(snapVals, currentStepIdx, cursor));
+            }
+
+            // Track decision times
+            long now = System.currentTimeMillis();
+            if (model.getLastMoveTimestamp() > 0) {
+                long delta = now - model.getLastMoveTimestamp();
+                model.getDecisionTimeDeltas().add(delta);
+            }
+            model.setLastMoveTimestamp(now);
             
             // Calculate coordinates for particle burst
             double totalWidth = 700.0;
@@ -2291,9 +2584,13 @@ public class ChromaCascadeApp extends Application {
                 
                 model.setCurrentStep(currentStepIdx + 1);
                 model.setComboCount(model.getComboCount() + 1);
+                model.setTotalCorrectMoves(model.getTotalCorrectMoves() + 1);
                 
                 // Spawn green particles
                 view.spawnParticles(px, py, model.getTheme().sorted, 25);
+                if (model.getComboCount() >= 3) {
+                    view.triggerScreenShake(2.5);
+                }
                 
                 if (currentStepIdx + 1 < steps.size()) {
                     String algo = model.getTargetAlgorithm();
@@ -2324,9 +2621,11 @@ public class ChromaCascadeApp extends Application {
                 model.setErrorFlashFrames(15);
                 model.setWaveErrors(model.getWaveErrors() + 1);
                 model.setComboCount(0); // Reset combo
+                model.setTotalIncorrectMoves(model.getTotalIncorrectMoves() + 1);
                 
-                // Spawn red particles
+                // Spawn red particles and screen shake
                 view.spawnParticles(px, py, Color.web("#f43f5e"), 20);
+                view.triggerScreenShake(7.5);
                 
                 if (!model.isPracticeMode()) {
                     int currentTimer = model.getCountdownTimer();
@@ -2354,6 +2653,7 @@ public class ChromaCascadeApp extends Application {
 
         private void checkWinCondition() {
             SoundManager.playWaveClear();
+            view.triggerScreenShake(4.0);
             
             // Spawn confetti particles from the top of the canvas
             for (int i = 0; i < 60; i++) {
@@ -2674,6 +2974,36 @@ public class ChromaCascadeApp extends Application {
         themeCb.setValue("Classic Neon");
         themeBox.getChildren().addAll(themeLabel, themeCb);
 
+        // Sound & CRT Settings Row
+        HBox settingsRow = new HBox(20);
+        settingsRow.setAlignment(Pos.CENTER);
+
+        CheckBox crtCb = new CheckBox("CRT SCANLINES [C]");
+        crtCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
+        crtCb.setSelected(view.isCrtEnabled());
+        crtCb.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            view.setCrtEnabled(newVal);
+        });
+
+        Label volLabel = new Label("VOL:");
+        volLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Slider volSlider = new Slider(0, 100, SoundManager.getMasterVolume() * 100);
+        volSlider.setPrefWidth(90);
+        volSlider.setStyle("-fx-cursor: hand;");
+        volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            SoundManager.setMasterVolume(newVal.doubleValue() / 100.0);
+        });
+
+        CheckBox muteCb = new CheckBox("MUTE [M]");
+        muteCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
+        muteCb.setSelected(SoundManager.isMuted());
+        muteCb.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            SoundManager.setMuted(newVal);
+        });
+
+        settingsRow.getChildren().addAll(crtCb, volLabel, volSlider, muteCb);
+
         Button leaderboardBtn = new Button("HIGH SCORES");
         leaderboardBtn.setStyle("-fx-background-color: #1e293b; -fx-text-fill: #f8fafc; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12px 30px; -fx-background-radius: 6px; -fx-border-color: #334155; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-min-width: 280; -fx-cursor: hand;");
         leaderboardBtn.setOnMouseEntered(e -> leaderboardBtn.setStyle("-fx-background-color: #a855f7; -fx-text-fill: #ffffff; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12px 30px; -fx-background-radius: 6px; -fx-border-color: #a855f7; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-min-width: 280; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(168,85,247,0.3), 8, 0, 0, 0);"));
@@ -2682,7 +3012,7 @@ public class ChromaCascadeApp extends Application {
         Label menuGuide = new Label("Press ESC to Quit Game");
         menuGuide.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 12px; -fx-text-fill: #475569; -fx-padding: 10px 0 0 0;");
 
-        menuLayout.getChildren().addAll(menuTitle, menuSubtitle, selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, practiceModeCb, themeBox, leaderboardBtn, menuGuide);
+        menuLayout.getChildren().addAll(menuTitle, menuSubtitle, selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, practiceModeCb, themeBox, settingsRow, leaderboardBtn, menuGuide);
 
         // Leaderboards Layout
         VBox leaderboardLayout = new VBox(20);
@@ -2778,7 +3108,44 @@ public class ChromaCascadeApp extends Application {
         // Center Canvas Wrapper
         StackPane canvasWrapper = new StackPane();
         canvasWrapper.setPadding(new Insets(10, 50, 10, 50));
-        canvasWrapper.getChildren().add(view.getCanvas());
+        Canvas gameCanvas = view.getCanvas();
+        canvasWrapper.getChildren().add(gameCanvas);
+
+        // Canvas Mouse interaction: Hover and Click selection/execution
+        gameCanvas.setOnMouseMoved(e -> {
+            if (model.getGameState().equalsIgnoreCase("PLAYING") && model.getStartCountdown() < 0) {
+                int idx = view.getBlockIndexAt(e.getX(), e.getY());
+                view.setHoveredIndex(idx);
+                gameCanvas.setCursor(idx != -1 ? Cursor.HAND : Cursor.DEFAULT);
+            } else {
+                view.setHoveredIndex(-1);
+                gameCanvas.setCursor(Cursor.DEFAULT);
+            }
+        });
+
+        gameCanvas.setOnMouseExited(e -> {
+            view.setHoveredIndex(-1);
+            gameCanvas.setCursor(Cursor.DEFAULT);
+        });
+
+        gameCanvas.setOnMouseClicked(e -> {
+            if (model.getGameState().equalsIgnoreCase("PLAYING") && model.getStartCountdown() < 0) {
+                int idx = view.getBlockIndexAt(e.getX(), e.getY());
+                if (idx != -1) {
+                    if (model.getActiveSegmentCursor() != idx) {
+                        model.setActiveSegmentCursor(idx);
+                        double pan = 0.0;
+                        PuzzleRow pr = model.getPuzzleRow();
+                        if (pr != null && pr.getCurrentSet() != null && pr.getCurrentSet().length > 1) {
+                            pan = ((double) idx / (pr.getCurrentSet().length - 1)) * 2.0 - 1.0;
+                        }
+                        SoundManager.playClick(pan * 0.4);
+                    } else {
+                        controller.executeShiftAction();
+                    }
+                }
+            }
+        });
 
         // Minimal HUD Log list
         HBox bottomPanel = new HBox();
@@ -2799,7 +3166,7 @@ public class ChromaCascadeApp extends Application {
         HBox controlsBar = new HBox();
         controlsBar.setPadding(new Insets(10));
         controlsBar.setAlignment(Pos.CENTER);
-        Text controlGuide = new Text("CONTROLS: [A] Move Left | [D] Move Right | [ENTER] Select/Shift | [R] Restart | [ESC] Pause");
+        Text controlGuide = new Text("CONTROLS: [A/←] [D/→] or Click Block | [ENTER/SPACE] Shift | [Z] Undo (Practice) | [M] Mute | [C] CRT | [R] Restart | [ESC] Pause");
         controlGuide.setFill(Color.web("#64748b"));
         controlGuide.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-style: italic; -fx-font-size: 11px;");
         controlsBar.getChildren().add(controlGuide);
@@ -2897,7 +3264,7 @@ public class ChromaCascadeApp extends Application {
             KeyCode code = event.getCode();
             if (code == KeyCode.ESCAPE) {
                 if (model.getGameState().equalsIgnoreCase("PLAYING")) {
-                    showPauseOverlay(rootContainer, model, controller, menuLayout, gameLayout);
+                    showPauseOverlay(rootContainer, model, controller, view, menuLayout, gameLayout);
                 } else if (model.getGameState().equalsIgnoreCase("PAUSED")) {
                     hidePauseOverlay(rootContainer, model, gameLayout);
                 } else if (model.getGameState().equalsIgnoreCase("GAME_OVER")) {
@@ -5582,7 +5949,7 @@ public class ChromaCascadeApp extends Application {
         });
     }
 
-    private static void showPauseOverlay(StackPane root, ChromaCascadeModel model, ChromaCascadeController controller, VBox menuLayout, VBox gameLayout) {
+    private static void showPauseOverlay(StackPane root, ChromaCascadeModel model, ChromaCascadeController controller, ChromaCascadeView view, VBox menuLayout, VBox gameLayout) {
         if (activePauseOverlay != null) {
             return;
         }
@@ -5598,10 +5965,10 @@ public class ChromaCascadeApp extends Application {
         overlay.setStyle("-fx-background-color: " + (isGB ? "rgba(202, 220, 159, 0.95)" : "rgba(11, 15, 25, 0.85)") + ";");
 
         // The card panel
-        VBox card = new VBox(25);
+        VBox card = new VBox(20);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(30, 40, 30, 40));
-        card.setMaxWidth(450);
+        card.setPadding(new Insets(25, 35, 25, 35));
+        card.setMaxWidth(460);
         card.setStyle("-fx-background-color: " + theme.panelBgHex + 
                       "; -fx-border-color: " + theme.borderHex + 
                       "; -fx-border-width: 2px; -fx-background-radius: 8px; -fx-border-radius: 8px;");
@@ -5614,20 +5981,59 @@ public class ChromaCascadeApp extends Application {
                                 "; -fx-effect: dropshadow(three-pass-box, " + theme.accentHex + "66, 12, 0, 0, 0);");
         }
 
+        String normalBg = isGB ? theme.panelBgHex : "#1e293b";
+        String normalText = isGB ? theme.textHex : "#f8fafc";
+        String normalBorder = isGB ? theme.borderHex : "#334155";
+        String hoverBg = isGB ? theme.textHex : theme.accentHex;
+        String hoverText = isGB ? theme.bgHex : "#ffffff";
+        String hoverBorder = isGB ? theme.textHex : theme.accentHex;
+
+        // Quick Settings: Volume & CRT
+        VBox settingsCard = new VBox(8);
+        settingsCard.setAlignment(Pos.CENTER);
+        settingsCard.setPadding(new Insets(10));
+        settingsCard.setStyle("-fx-background-color: " + (isGB ? "rgba(139,172,15,0.15)" : "rgba(30,41,59,0.5)") + "; -fx-background-radius: 6px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1px; -fx-border-radius: 6px;");
+
+        HBox volRow = new HBox(10);
+        volRow.setAlignment(Pos.CENTER);
+        int curVolPct = (int) Math.round(SoundManager.getMasterVolume() * 100);
+        Label volLabel = new Label("VOL: " + curVolPct + "%");
+        volLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "7px" : "11px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
+
+        Slider volSlider = new Slider(0, 100, curVolPct);
+        volSlider.setPrefWidth(100);
+        volSlider.setStyle("-fx-cursor: hand;");
+        volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int p = newVal.intValue();
+            SoundManager.setMasterVolume(p / 100.0);
+            volLabel.setText("VOL: " + p + "%");
+        });
+
+        Button muteBtn = new Button(SoundManager.isMuted() ? "UNMUTE" : "MUTE");
+        Button crtBtn = new Button(view.isCrtEnabled() ? "CRT: ON" : "CRT: OFF");
+
+        setupButtonHover(muteBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#f59e0b", hoverText, isGB ? theme.textHex : "#f59e0b", isGB, fontFam, isGB ? "7px" : "10px", false, "#f59e0b");
+        setupButtonHover(crtBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#06b6d4", hoverText, isGB ? theme.textHex : "#06b6d4", isGB, fontFam, isGB ? "7px" : "10px", false, "#06b6d4");
+
+        muteBtn.setOnAction(e -> {
+            SoundManager.toggleMute();
+            muteBtn.setText(SoundManager.isMuted() ? "UNMUTE" : "MUTE");
+        });
+
+        crtBtn.setOnAction(e -> {
+            view.toggleCrt();
+            crtBtn.setText(view.isCrtEnabled() ? "CRT: ON" : "CRT: OFF");
+        });
+
+        volRow.getChildren().addAll(volLabel, volSlider, muteBtn, crtBtn);
+        settingsCard.getChildren().add(volRow);
+
         VBox buttonContainer = new VBox(15);
         buttonContainer.setAlignment(Pos.CENTER);
 
         Button resumeBtn = new Button("RESUME");
         Button restartBtn = new Button("RESTART");
         Button leaveBtn = new Button("LEAVE");
-
-        String normalBg = isGB ? theme.panelBgHex : "#1e293b";
-        String normalText = isGB ? theme.textHex : "#f8fafc";
-        String normalBorder = isGB ? theme.borderHex : "#334155";
-        
-        String hoverBg = isGB ? theme.textHex : theme.accentHex;
-        String hoverText = isGB ? theme.bgHex : "#ffffff";
-        String hoverBorder = isGB ? theme.textHex : theme.accentHex;
 
         setupButtonHover(resumeBtn, normalBg, normalText, normalBorder, hoverBg, hoverText, hoverBorder, isGB, fontFam, isGB ? "9px" : "14px", true, theme.accentHex);
         setupButtonHover(restartBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#3b82f6", hoverText, isGB ? theme.textHex : "#3b82f6", isGB, fontFam, isGB ? "9px" : "14px", true, "#3b82f6");
@@ -5686,7 +6092,7 @@ public class ChromaCascadeApp extends Application {
         });
 
         buttonContainer.getChildren().addAll(resumeBtn, restartBtn, leaveBtn);
-        card.getChildren().addAll(pauseTitle, buttonContainer);
+        card.getChildren().addAll(pauseTitle, settingsCard, buttonContainer);
         overlay.getChildren().add(card);
 
         activePauseOverlay = overlay;
