@@ -423,15 +423,36 @@ public class ChromaCascadeApp extends Application {
         }
 
         public static void playSuccess() {
-            playSuccess(0.0);
+            playSuccess(0.0, 1);
         }
 
         public static void playSuccess(double pan) {
+            playSuccess(pan, 1);
+        }
+
+        public static void playSuccess(double pan, int combo) {
             new Thread(() -> {
                 try {
-                    playTone(988, 40, 0.15, pan);  // B5 (bright start)
-                    Thread.sleep(40);
-                    playTone(1318, 80, 0.15, pan); // E6 (chime finish)
+                    // Ascending pentatonic scale: C5, D5, E5, G5, A5, C6, D6, E6, G6, A6
+                    int[] pentatonic = {523, 587, 659, 784, 880, 1046, 1175, 1318, 1568, 1760};
+                    int noteIdx = Math.min(Math.max(0, combo - 1), pentatonic.length - 1);
+                    int baseHz = pentatonic[noteIdx];
+                    int fifthHz = (int) (baseHz * 1.498);
+                    int octaveHz = baseHz * 2;
+
+                    if (combo >= 5) {
+                        // Fever Mode: rapid 3-note arpeggio sparkle
+                        playTone(baseHz, 30, 0.16, pan);
+                        Thread.sleep(25);
+                        playTone(fifthHz, 35, 0.16, pan);
+                        Thread.sleep(30);
+                        playTone(octaveHz, 75, 0.18, pan);
+                    } else {
+                        // Ascending melodic fifth chime
+                        playTone(baseHz, 35, 0.15, pan);
+                        Thread.sleep(35);
+                        playTone(fifthHz, 65, 0.15, pan);
+                    }
                 } catch (InterruptedException e) {}
             }).start();
         }
@@ -1498,6 +1519,7 @@ public class ChromaCascadeApp extends Application {
         
         private java.util.Map<BlockSegment, Double> visualXMap = new java.util.HashMap<>();
         private java.util.Map<BlockSegment, Double> visualYMap = new java.util.HashMap<>();
+        private java.util.Map<BlockSegment, Double> squashMap = new java.util.HashMap<>();
         private java.util.List<Particle> particles = new java.util.ArrayList<>();
         private java.util.List<FloatingText> floatingTexts = new java.util.ArrayList<>();
 
@@ -1577,6 +1599,7 @@ public class ChromaCascadeApp extends Application {
         public void clearVisuals() {
             visualXMap.clear();
             visualYMap.clear();
+            squashMap.clear();
             floatingTexts.clear();
             particles.clear();
         }
@@ -1648,9 +1671,24 @@ public class ChromaCascadeApp extends Application {
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
             // Draw Canvas structural outline
-            gc.setStroke(theme.border);
-            gc.setLineWidth(2.0);
-            gc.strokeRoundRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20, 8, 8);
+            boolean isFever = model.getComboCount() >= 5 && model.getFreezeFrames() <= 0 && !model.isGameOver();
+            if (isFever) {
+                double time = System.currentTimeMillis() * 0.005;
+                double pulse = 0.5 + 0.5 * Math.sin(time);
+                Color feverColor = Color.web("#f59e0b").interpolate(Color.web("#ec4899"), pulse);
+                gc.setStroke(feverColor);
+                gc.setLineWidth(3.5);
+                gc.strokeRoundRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20, 8, 8);
+                if (Math.random() < 0.20) {
+                    double rx = 10 + Math.random() * (canvas.getWidth() - 20);
+                    double ry = Math.random() < 0.5 ? 12 : canvas.getHeight() - 12;
+                    spawnParticles(rx, ry, feverColor, 1);
+                }
+            } else {
+                gc.setStroke(theme.border);
+                gc.setLineWidth(2.0);
+                gc.strokeRoundRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20, 8, 8);
+            }
 
             // Draw horizontal row segments
             PuzzleRow row = model.getPuzzleRow();
@@ -1783,8 +1821,15 @@ public class ChromaCascadeApp extends Application {
                     double curX = visualXMap.computeIfAbsent(segment, k -> finalX);
                     double curY = visualYMap.computeIfAbsent(segment, k -> finalY);
 
+                    double distBefore = Math.abs(targetX - curX) + Math.abs(targetY - curY);
+
                     curX += (targetX - curX) * 0.22;
                     curY += (targetY - curY) * 0.22;
+
+                    double distAfter = Math.abs(targetX - curX) + Math.abs(targetY - curY);
+                    if (distBefore > 3.0 && distAfter <= 3.0) {
+                        squashMap.put(segment, 1.0);
+                    }
 
                     visualXMap.put(segment, curX);
                     visualYMap.put(segment, curY);
@@ -1793,6 +1838,26 @@ public class ChromaCascadeApp extends Application {
                     double y = curY;
                     double w = boxWidth - 8;
                     double h = boxHeight;
+
+                    // Elastic squash & stretch bounce deformation
+                    Double sqFactor = squashMap.get(segment);
+                    double scaleX = 1.0;
+                    double scaleY = 1.0;
+                    if (sqFactor != null && sqFactor > 0.0) {
+                        scaleX = 1.0 + 0.10 * Math.sin(sqFactor * Math.PI);
+                        scaleY = 1.0 - 0.10 * Math.sin(sqFactor * Math.PI);
+                        double nextFactor = sqFactor - 0.14;
+                        if (nextFactor <= 0.0) {
+                            squashMap.remove(segment);
+                        } else {
+                            squashMap.put(segment, nextFactor);
+                        }
+                    }
+
+                    double rendW = w * scaleX;
+                    double rendH = h * scaleY;
+                    double rendX = x + (w - rendW) / 2.0;
+                    double rendY = y + (h - rendH) / 2.0;
 
                     // Color based on pre-computed step greenBlocks
                     boolean isSorted = false;
@@ -1819,7 +1884,7 @@ public class ChromaCascadeApp extends Application {
                     // Glow background shadow for sorted elements
                     if (isSorted) {
                         gc.setFill(segmentColor.deriveColor(0, 1, 1, 0.15));
-                        gc.fillRoundRect(x - 2, y - 2, w + 4, h + 4, 6, 6);
+                        gc.fillRoundRect(rendX - 2, rendY - 2, rendW + 4, rendH + 4, 6, 6);
                     }
 
                     // Block gradient
@@ -1829,7 +1894,7 @@ public class ChromaCascadeApp extends Application {
                             new Stop(1, segmentColor.deriveColor(0, 1, 0.85, 0.95))
                     );
                     gc.setFill(gradient);
-                    gc.fillRoundRect(x, y, w, h, 4, 4);
+                    gc.fillRoundRect(rendX, rendY, rendW, rendH, 4, 4);
 
                     // Border (colored if active pivot or heads)
                     Color borderCol = segmentColor.deriveColor(0, 1, 1.2, 1.0);
@@ -1840,45 +1905,45 @@ public class ChromaCascadeApp extends Application {
                     }
                     gc.setStroke(borderCol);
                     gc.setLineWidth(isPivot || isHeadA || isHeadB ? 2.0 : 1.0);
-                    gc.strokeRoundRect(x, y, w, h, 4, 4);
+                    gc.strokeRoundRect(rendX, rendY, rendW, rendH, 4, 4);
 
                     // Selection cursor highlight
                     if (i == model.getActiveSegmentCursor() && model.getFreezeFrames() <= 0) {
                         gc.setStroke(theme.accent);
                         gc.setLineWidth(2.5);
-                        gc.strokeRoundRect(x - 1, y - 1, w + 2, h + 2, 4, 4);
+                        gc.strokeRoundRect(rendX - 1, rendY - 1, rendW + 2, rendH + 2, 4, 4);
                     } else if (i == hoveredIndex && model.getFreezeFrames() <= 0) {
                         // Mouse hover highlight
                         gc.setStroke(theme.accent.deriveColor(0, 1, 1, 0.45));
                         gc.setLineWidth(1.8);
-                        gc.strokeRoundRect(x - 1, y - 1, w + 2, h + 2, 4, 4);
+                        gc.strokeRoundRect(rendX - 1, rendY - 1, rendW + 2, rendH + 2, 4, 4);
                     }
 
                     // Draw Badges above blocks
                     if (isPivot) {
-                        double badgeW = Math.min(w, 42.0);
-                        double badgeX = x + (w - badgeW) / 2.0;
+                        double badgeW = Math.min(rendW, 42.0);
+                        double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(Color.web("#ea580c"));
-                        gc.fillRoundRect(badgeX, y - 17, badgeW, 13, 3, 3);
+                        gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
                         gc.setFill(Color.WHITE);
                         gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        gc.fillText("PIVOT", badgeX + (badgeW - 25) / 2.0, y - 8);
+                        gc.fillText("PIVOT", badgeX + (badgeW - 25) / 2.0, rendY - 8);
                     } else if (isHeadA) {
-                        double badgeW = Math.min(w, 42.0);
-                        double badgeX = x + (w - badgeW) / 2.0;
+                        double badgeW = Math.min(rendW, 42.0);
+                        double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(theme.accent);
-                        gc.fillRoundRect(badgeX, y - 17, badgeW, 13, 3, 3);
+                        gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
                         gc.setFill(Color.WHITE);
                         gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        gc.fillText("HEAD A", badgeX + (badgeW - 30) / 2.0, y - 8);
+                        gc.fillText("HEAD A", badgeX + (badgeW - 30) / 2.0, rendY - 8);
                     } else if (isHeadB) {
-                        double badgeW = Math.min(w, 42.0);
-                        double badgeX = x + (w - badgeW) / 2.0;
+                        double badgeW = Math.min(rendW, 42.0);
+                        double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(theme.accent);
-                        gc.fillRoundRect(badgeX, y - 17, badgeW, 13, 3, 3);
+                        gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
                         gc.setFill(Color.WHITE);
                         gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        gc.fillText("HEAD B", badgeX + (badgeW - 30) / 2.0, y - 8);
+                        gc.fillText("HEAD B", badgeX + (badgeW - 30) / 2.0, rendY - 8);
                     }
 
                     // Centered raw integer value
@@ -1887,14 +1952,14 @@ public class ChromaCascadeApp extends Application {
                     String valStr = String.valueOf(segment.getRawValue());
                     double charWidth = isGameBoy ? 12.0 : 10.0;
                     double textWidth = charWidth * valStr.length();
-                    gc.fillText(valStr, x + (w - textWidth) / 2.0, y + 46);
+                    gc.fillText(valStr, rendX + (rendW - textWidth) / 2.0, rendY + 46);
 
                     // Weight detail
                     String weightStr = String.format("%.1f", segment.calculateSortWeight());
                     gc.setFont(getThemeFont("Consolas", FontWeight.NORMAL, 9.0, isGameBoy));
                     gc.setFill(theme.textMuted.deriveColor(0, 1, 1, 0.8));
                     double wStrWidth = 5.5 * weightStr.length();
-                    gc.fillText(weightStr, x + (w - wStrWidth) / 2.0, y + h - 6);
+                    gc.fillText(weightStr, rendX + (rendW - wStrWidth) / 2.0, rendY + rendH - 6);
                 }
 
                 // Draw greater than / less than comparison badge between Quick Sort cursor and pivot
@@ -2258,10 +2323,17 @@ public class ChromaCascadeApp extends Application {
                         topScore = model.getScore();
                     }
                     double acc = model.getAccuracyRate();
-                    scoreValLabel.setText(String.format("SCORE: %05d   HI: %05d   ACC: %.0f%% [%s]", 
-                        model.getScore(), topScore, acc, model.getPerformanceGrade()));
+                    int curCombo = model.getComboCount();
+                    String comboSuffix = "";
+                    if (curCombo >= 5) {
+                        comboSuffix = String.format("   🔥 FEVER x%d (2X)", curCombo);
+                    } else if (curCombo >= 2) {
+                        comboSuffix = String.format("   COMBO x%d", curCombo);
+                    }
+                    scoreValLabel.setText(String.format("SCORE: %05d   HI: %05d   ACC: %.0f%% [%s]%s", 
+                        model.getScore(), topScore, acc, model.getPerformanceGrade(), comboSuffix));
                 }
-                scoreValLabel.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "10px" : "15px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
+                scoreValLabel.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "9px" : "14px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
             }
             if (timerValLabel != null) {
                 if (model.isPracticeMode()) {
@@ -2580,15 +2652,19 @@ public class ChromaCascadeApp extends Application {
                 int val = set[cursor].getRawValue();
                 GridSorter.shiftElement(set, step.correctIndex, step.targetIndex);
                 
-                SoundManager.playSuccess(pan);
+                int newCombo = model.getComboCount() + 1;
+                model.setComboCount(newCombo);
+                SoundManager.playSuccess(pan, newCombo);
                 
                 model.setCurrentStep(currentStepIdx + 1);
-                model.setComboCount(model.getComboCount() + 1);
                 model.setTotalCorrectMoves(model.getTotalCorrectMoves() + 1);
                 
                 // Spawn green particles
                 view.spawnParticles(px, py, model.getTheme().sorted, 25);
-                if (model.getComboCount() >= 3) {
+                if (newCombo == 5) {
+                    view.triggerScreenShake(3.5);
+                    view.spawnFloatingText(view.getCanvas().getWidth() / 2, view.getCanvas().getHeight() / 2 - 50, "🔥 FEVER MODE! 2X POINTS! 🔥", Color.web("#f59e0b"));
+                } else if (newCombo >= 3) {
                     view.triggerScreenShake(2.5);
                 }
                 
@@ -2601,12 +2677,19 @@ public class ChromaCascadeApp extends Application {
                 
                 // Award points for step and spawn floating texts
                 if (!model.isPracticeMode()) {
-                    int stepPts = 10 * model.getComboCount();
+                    int multiplier = (newCombo >= 5) ? 2 : 1;
+                    int stepPts = 10 * newCombo * multiplier;
                     model.setScore(model.getScore() + stepPts);
-                    addLogMessage(String.format("CORRECT: Value %d shifted. (+%d PTS, Combo x%d!)", val, stepPts, model.getComboCount()));
-                    view.spawnFloatingText(px, py - 20, "+" + stepPts + " PTS", model.getTheme().sorted);
-                    if (model.getComboCount() >= 2) {
-                        view.spawnFloatingText(px, py - 40, "COMBO x" + model.getComboCount() + "!", model.getTheme().accent);
+                    if (newCombo >= 5) {
+                        addLogMessage(String.format("CORRECT: Value %d shifted. (+%d PTS, 🔥 FEVER x%d (2X)!)", val, stepPts, newCombo));
+                        view.spawnFloatingText(px, py - 20, "+" + stepPts + " PTS (2X)", Color.web("#f59e0b"));
+                        view.spawnFloatingText(px, py - 40, "🔥 FEVER x" + newCombo + "!", Color.web("#ec4899"));
+                    } else {
+                        addLogMessage(String.format("CORRECT: Value %d shifted. (+%d PTS, Combo x%d!)", val, stepPts, newCombo));
+                        view.spawnFloatingText(px, py - 20, "+" + stepPts + " PTS", model.getTheme().sorted);
+                        if (newCombo >= 2) {
+                            view.spawnFloatingText(px, py - 40, "COMBO x" + newCombo + "!", model.getTheme().accent);
+                        }
                     }
                 } else {
                     addLogMessage(String.format("CORRECT: Value %d shifted.", val));

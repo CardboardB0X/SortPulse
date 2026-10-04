@@ -30,7 +30,8 @@ This repository contains the complete codebase, launch scripts, font assets, tec
 * **Audio Controls & Procedural Synth:** 8-bit dynamic runtime synthesizer with master volume slider and instant mute toggle (`[M]`).
 * **Tutorial Overlay Visual Guides:** Interactive, step-by-step animated previews for all five algorithms to help players learn the mechanics before starting.
 * **Practice Mode:** Train with zero timer pressure or penalty calculations.
-* **Combo Multiplier System:** Stack consecutive correct moves to trigger score multipliers and pulsing visual indicators.
+* **Combo Multiplier & Fever Mode:** Stack consecutive correct moves to trigger score multipliers and pulsing visual indicators. Reaching 5+ combo unlocks **Fever Mode** with double points ($2\times$), glowing chromatic neon borders, edge sparks, and ascending pentatonic chimes.
+* **Elastic Landing Bounce:** Blocks settling into destination slots apply organic squash-and-stretch spring physics for tactile mechanical snap.
 * **Juicy Vector Particle Engine:** Custom physics particle bursts erupting on correct/incorrect actions, plus falling confetti cascades on wave completion.
 * **High Score Leaderboard:** Automatically saves and displays top 5 runs for each algorithm mode locally in `sort_pulse_scores.txt`.
 * **Crisp Font Rendering:** Enforces integer-size loading and caching for pixel-art fonts ("Press Start 2P") to prevent high-DPI scaling blurriness.
@@ -135,9 +136,15 @@ graph TD
 ---
 
 ### 🧮 Score & Combo System
-* **Correct Move:** Adds `10 × current combo` to your score.
+* **Correct Move:** Adds `10 × current combo` to your score (doubled to `20 × current combo` during **Fever Mode**).
 * **Combo Count:** Increases by `1` with every correct move. When you have `2` or more consecutive correct moves, a pulsing **COMBO xN** banner is displayed.
-* **Mistakes:** Resets the active combo counter back to `0`.
+* **Ascending Pentatonic Audio:** Correct moves ascend through a harmonic pentatonic scale ($C_5 \to D_5 \to E_5 \to G_5 \to A_5 \to C_6 \dots$), turning sorting streaks into a musical performance.
+* **🔥 Combo Fever Mode ($\ge 5$ Combo):**
+  * **Double Score Multiplier:** All successful moves award $2\times$ combo points.
+  * **Chromatic Neon Border:** The screen boundary pulses with oscillating gold and magenta energy and trailing edge sparks.
+  * **Arpeggiated Fanfare:** Triggering Fever Mode plays a triumphant 3-note arpeggiated chord.
+* **Mistakes:** Resets the active combo counter back to `0`, cancelling Fever Mode with an immediate screen shake.
+* **Elastic Landing Bounce:** Blocks settling into destination slots briefly squash ($0.92\times$ height) and stretch ($1.08\times$ width) with spring physics for tactile mechanical weight.
 * **Wave Completion Score:**
   $$\text{Score Reward} = 100 + \max(0, \text{Timer} \times 10 - \text{Mistakes} \times 30)$$
   *Clear waves quickly and accurately to maximize speed bonuses.*
