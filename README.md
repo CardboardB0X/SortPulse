@@ -23,15 +23,17 @@ This repository contains the complete codebase, launch scripts, font assets, tec
 ## 📸 Key Features
 
 * **Five Unique Algorithm Modes:** Manually drive the step-by-step logic of Selection, Bubble, Insertion, Quick, and Merge Sort.
+* **Large, High-Legibility UI:** Enhanced visuals across both game and pause screens, featuring an expanded $960\times 480$ game canvas, $110\text{px}$ high block elements, bold $26\text{px}$ values, a $48\text{px}$ timer readout, and an enlarged $840\text{px}$ operation log view.
+* **Resolution & Window Mode Management:** Choose between immersive borderless Fullscreen and native decorated Windowed mode with full resolution scaling (`1920x1080` Full HD, `1600x900` HD+, `1366x768`, and `1280x720` HD). Configurable dynamically in both the Main Menu Settings and the in-game Pause Menu.
+* **Independent Synthesizer Audio Mixing:** Granular volume controls with dedicated real-time sliders for **Master Volume**, **Music (BGM)**, and **Sound Effects (SFX)**, plus instant mute toggling (`[M]`).
 * **Dual Aesthetics & Theme Engine:** Toggle between the vibrant **Classic Neon** (default) or the retro **GameBoy Retro** (desaturated DMG LCD color palette with grayscale anti-aliasing for crisp text).
 * **Retro CRT Scanlines & Vignette:** Optional post-processing filter (`[C]`) drawing simulated horizontal CRT phosphors and edge vignetting.
 * **Dynamic Screen Shake Engine:** Procedural physics screen-shake impulses triggering on mistakes, high combo runs, and wave clears for visceral arcade game feel.
 * **Hybrid Keyboard & Mouse Controls:** Play with `[A]`/`[D]`, Arrow Keys, Spacebar, or directly click and hover blocks on the canvas.
-* **Audio Controls & Procedural Synth:** 8-bit dynamic runtime synthesizer with master volume slider and instant mute toggle (`[M]`).
 * **Tutorial Overlay Visual Guides:** Interactive, step-by-step animated previews for all five algorithms to help players learn the mechanics before starting.
 * **Practice Mode:** Train with zero timer pressure or penalty calculations.
 * **Colorblind Accessibility & Symbol Mode:** Toggleable (`[V]`) shape signifiers (`[✓]` checkmark pills for sorted blocks, `★` stars for pivots, `▲` chevrons for merge heads) and high-contrast text outlines for universal legibility across all vision types and displays.
-* **In-Game Algorithm Rulebook:** Instant reference card available directly inside the Pause Menu (`[ESC]`) explaining mechanics, indicators, and pro-tips on the fly without abandoning current match progress.
+* **In-Game Algorithm Rulebook & Pause Menu:** Instant reference card available directly inside the enlarged $620\text{px}$ Pause Menu (`[ESC]`) alongside quick settings, explaining mechanics, indicators, and pro-tips on the fly without abandoning current match progress.
 * **Combo Multiplier & Fever Mode:** Stack consecutive correct moves to trigger score multipliers and pulsing visual indicators. Reaching 5+ combo unlocks **Fever Mode** with double points ($2\times$), glowing chromatic neon borders, edge sparks, and ascending pentatonic chimes.
 * **Elastic Landing Bounce:** Blocks settling into destination slots apply organic squash-and-stretch spring physics for tactile mechanical snap.
 * **Juicy Vector Particle Engine:** Custom physics particle bursts erupting on correct/incorrect actions, plus falling confetti cascades on wave completion.

@@ -184,7 +184,8 @@ public class ChromaCascadeApp extends Application {
     private static void applyTheme(String themeName, StackPane rootContainer, VBox menuLayout, VBox leaderboardLayout, VBox gameLayout, 
             Label menuTitle, Label menuSubtitle, Label themeLabel, ComboBox<String> themeCb, CheckBox practiceModeCb, 
             Label lbTitle, Button backBtn, ListView<String> logView, Label timerVal, Label scoreVal, Label modeLabel, Text controlGuide, 
-            Button selectionBtn, Button quickBtn, Button mergeBtn, Button bubbleBtn, Button insertionBtn, Button leaderboardBtn) {
+            Button selectionBtn, Button quickBtn, Button mergeBtn, Button bubbleBtn, Button insertionBtn, Button leaderboardBtn,
+            Button settingsBtn, VBox settingsLayout, Label settingsTitle, Button settingsBackBtn) {
         
         Theme theme = THEMES.getOrDefault(themeName, THEMES.get("Classic Neon"));
         boolean isGB = theme.name.equalsIgnoreCase("GameBoy Retro");
@@ -196,6 +197,7 @@ public class ChromaCascadeApp extends Application {
         rootContainer.setStyle("-fx-background-color: " + theme.bgHex + smoothStyle);
         menuLayout.setStyle("-fx-background-color: " + theme.bgHex + smoothStyle);
         leaderboardLayout.setStyle("-fx-background-color: " + theme.bgHex + smoothStyle);
+        settingsLayout.setStyle("-fx-background-color: " + theme.bgHex + smoothStyle);
         gameLayout.setStyle("-fx-background-color: " + theme.bgHex + smoothStyle);
         
         // Titles and Text headers
@@ -205,18 +207,20 @@ public class ChromaCascadeApp extends Application {
             themeLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: 8px; -fx-font-weight: bold; -fx-text-fill: " + theme.textMutedHex + ";");
             practiceModeCb.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: 9px; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
             lbTitle.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
+            settingsTitle.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
         } else {
             menuTitle.setStyle("-fx-font-family: 'Segoe UI', 'Outfit', sans-serif; -fx-font-size: 44px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + "; -fx-effect: dropshadow(three-pass-box, " + theme.accentHex + "66, 12, 0, 0, 0);");
             menuSubtitle.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 13px; -fx-text-fill: " + theme.textMutedHex + "; -fx-padding: -15px 0 10px 0;");
             themeLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: " + theme.textMutedHex + ";");
             practiceModeCb.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 13px; -fx-text-fill: " + theme.textHex + ";");
             lbTitle.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
+            settingsTitle.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
         }
         
         // Dropdown selection style
         themeCb.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-font-family: " + fontFam + "; -fx-font-weight: bold; -fx-font-size: " + (isGB ? "9px" : "12px") + ";");
         
-        // Back Button
+        // Back Buttons
         backBtn.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-font-family: " + fontFam + "; -fx-font-weight: bold; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-padding: 10px 24px; -fx-background-radius: 4px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px; -fx-cursor: hand;");
         backBtn.setOnMouseEntered(e -> {
             SoundManager.playHover();
@@ -224,14 +228,21 @@ public class ChromaCascadeApp extends Application {
         });
         backBtn.setOnMouseExited(e -> backBtn.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-font-family: " + fontFam + "; -fx-font-weight: bold; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-padding: 10px 24px; -fx-background-radius: 4px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px; -fx-cursor: hand;"));
 
+        settingsBackBtn.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-font-family: " + fontFam + "; -fx-font-weight: bold; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-padding: 10px 24px; -fx-background-radius: 4px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px; -fx-cursor: hand;");
+        settingsBackBtn.setOnMouseEntered(e -> {
+            SoundManager.playHover();
+            settingsBackBtn.setStyle("-fx-background-color: " + theme.textHex + "; -fx-text-fill: " + theme.bgHex + "; -fx-font-family: " + fontFam + "; -fx-font-weight: bold; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-padding: 10px 24px; -fx-background-radius: 4px; -fx-border-color: " + theme.textHex + "; -fx-border-width: 1.5px; -fx-cursor: hand;");
+        });
+        settingsBackBtn.setOnMouseExited(e -> settingsBackBtn.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-font-family: " + fontFam + "; -fx-font-weight: bold; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-padding: 10px 24px; -fx-background-radius: 4px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px; -fx-cursor: hand;"));
+
         // HUD panel components
-        timerVal.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "24px" : "44px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
-        scoreVal.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "10px" : "16px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.textHex + ";");
-        modeLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "9px" : "13px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.sortedHex + ";");
-        controlGuide.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "8px" : "11px") + "; -fx-fill: " + theme.textMutedHex + "; -fx-font-weight: bold;");
+        timerVal.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "28px" : "48px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
+        scoreVal.setStyle("-fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "11px" : "16px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.textHex + ";");
+        modeLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "10px" : "14px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.sortedHex + ";");
+        controlGuide.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "9px" : "12px") + "; -fx-fill: " + theme.textMutedHex + "; -fx-font-weight: bold;");
 
         // Log View list
-        logView.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-control-inner-background: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "8px" : "11px") + "; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px;");
+        logView.setStyle("-fx-background-color: " + theme.panelBgHex + "; -fx-control-inner-background: " + theme.panelBgHex + "; -fx-text-fill: " + theme.textHex + "; -fx-font-family: " + fontMono + "; -fx-font-size: " + (isGB ? "9px" : "12px") + "; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1.5px;");
 
         // Menu buttons (styled according to algorithm accent colors)
         styleMenuButton(selectionBtn, theme, "#10b981"); // Emerald Green
@@ -239,7 +250,34 @@ public class ChromaCascadeApp extends Application {
         styleMenuButton(mergeBtn, theme, "#3b82f6");     // Dodge Blue
         styleMenuButton(bubbleBtn, theme, "#ec4899");    // Hot Pink
         styleMenuButton(insertionBtn, theme, "#8b5cf6"); // Purple
+        styleMenuButton(settingsBtn, theme, "#06b6d4");  // Cyan / Blue
         styleMenuButton(leaderboardBtn, theme, "#a855f7");// Violet
+    }
+
+    // --- Display & Resolution Settings ---
+    public static class DisplaySettings {
+        public static boolean isFullscreen = true;
+        public static int windowWidth = 1600;
+        public static int windowHeight = 900;
+        public static String currentResolution = "1600x900";
+        public static Stage primaryStageRef = null;
+
+        public static void apply(Stage stage, boolean fullscreen, int width, int height) {
+            isFullscreen = fullscreen;
+            windowWidth = width;
+            windowHeight = height;
+            currentResolution = width + "x" + height;
+            if (stage != null) {
+                if (fullscreen) {
+                    stage.setFullScreen(true);
+                } else {
+                    stage.setFullScreen(false);
+                    stage.setWidth(width);
+                    stage.setHeight(height);
+                    stage.centerOnScreen();
+                }
+            }
+        }
     }
 
     // --- Retro Sound Synthesizer Engine ---
@@ -250,15 +288,17 @@ public class ChromaCascadeApp extends Application {
             double phase = 0.0;
             final double volume;
             final double pan; // -1.0 (left) to 1.0 (right)
+            final boolean isMusic;
             int remainingSamples;
             final int totalSamples;
             final int fadeSamples;
 
-            ActiveTone(double hz, int msecs, double volume, double pan) {
+            ActiveTone(double hz, int msecs, double volume, double pan, boolean isMusic) {
                 this.hz = hz;
                 this.phaseStep = 2.0 * Math.PI * hz / 44100.0;
                 this.volume = volume;
                 this.pan = pan;
+                this.isMusic = isMusic;
                 this.totalSamples = (int) (44100.0 * (msecs / 1000.0));
                 this.remainingSamples = this.totalSamples;
                 this.fadeSamples = this.totalSamples / 10;
@@ -271,6 +311,8 @@ public class ChromaCascadeApp extends Application {
         private static SourceDataLine mixerLine;
 
         private static volatile double masterVolume = 0.8;
+        private static volatile double musicVolume = 0.8;
+        private static volatile double sfxVolume = 0.8;
         private static volatile boolean soundMuted = false;
 
         public static void setMasterVolume(double vol) {
@@ -279,6 +321,22 @@ public class ChromaCascadeApp extends Application {
 
         public static double getMasterVolume() {
             return masterVolume;
+        }
+
+        public static void setMusicVolume(double vol) {
+            musicVolume = Math.max(0.0, Math.min(1.0, vol));
+        }
+
+        public static double getMusicVolume() {
+            return musicVolume;
+        }
+
+        public static void setSfxVolume(double vol) {
+            sfxVolume = Math.max(0.0, Math.min(1.0, vol));
+        }
+
+        public static double getSfxVolume() {
+            return sfxVolume;
         }
 
         public static void toggleMute() {
@@ -340,7 +398,8 @@ public class ChromaCascadeApp extends Application {
                                             envelope = (double) tone.remainingSamples / tone.fadeSamples;
                                         }
                                     }
-                                    double sampleVal = Math.sin(tone.phase) * tone.volume * envelope;
+                                    double volFactor = tone.isMusic ? musicVolume : sfxVolume;
+                                    double sampleVal = Math.sin(tone.phase) * tone.volume * volFactor * envelope;
                                     tone.phase += tone.phaseStep;
                                     if (tone.phase > 2.0 * Math.PI) {
                                         tone.phase -= 2.0 * Math.PI;
@@ -413,12 +472,20 @@ public class ChromaCascadeApp extends Application {
         }
 
         private static void playTone(int hz, int msecs, double volume) {
-            playTone(hz, msecs, volume, 0.0);
+            playTone(hz, msecs, volume, 0.0, false);
         }
 
         private static void playTone(int hz, int msecs, double volume, double pan) {
+            playTone(hz, msecs, volume, pan, false);
+        }
+
+        private static void playMusicTone(int hz, int msecs, double volume) {
+            playTone(hz, msecs, volume, 0.0, true);
+        }
+
+        private static void playTone(int hz, int msecs, double volume, double pan, boolean isMusic) {
             synchronized (activeTones) {
-                activeTones.add(new ActiveTone(hz, msecs, volume, pan));
+                activeTones.add(new ActiveTone(hz, msecs, volume, pan, isMusic));
             }
         }
 
@@ -593,7 +660,7 @@ public class ChromaCascadeApp extends Application {
                             int noteMsecs = 80;
                             int totalMsecs = (int) (200.0 + 250.0 * timeRatio);
 
-                            playTone(note, noteMsecs, 0.02);
+                            playMusicTone(note, noteMsecs, 0.025);
 
                             try {
                                 Thread.sleep(totalMsecs);
@@ -1567,19 +1634,19 @@ public class ChromaCascadeApp extends Application {
             int size = row.getCurrentSet().length;
             if (size <= 0) return -1;
 
-            double totalWidth = 700.0;
-            double boxHeight = 85.0;
+            double totalWidth = 840.0;
+            double boxHeight = 110.0;
             double boxWidth = totalWidth / size;
             double startX = (canvas.getWidth() - totalWidth) / 2.0;
             double startY = (canvas.getHeight() - boxHeight) / 2.0;
 
             String targetAlgo = model.getTargetAlgorithm();
             if (targetAlgo.equalsIgnoreCase("Merge Sort")) {
-                if (mouseY < startY - 90 || mouseY > startY + 60 + boxHeight + 30) {
+                if (mouseY < startY - 105 || mouseY > startY + 70 + boxHeight + 35) {
                     return -1;
                 }
             } else {
-                if (mouseY < startY - 30 || mouseY > startY + boxHeight + 30) {
+                if (mouseY < startY - 35 || mouseY > startY + boxHeight + 35) {
                     return -1;
                 }
             }
@@ -1595,7 +1662,7 @@ public class ChromaCascadeApp extends Application {
 
         public ChromaCascadeView(ChromaCascadeModel model) {
             this.model = model;
-            this.canvas = new Canvas(800, 400);
+            this.canvas = new Canvas(960, 480);
             this.gc = canvas.getGraphicsContext2D();
         }
 
@@ -1699,8 +1766,8 @@ public class ChromaCascadeApp extends Application {
                 BlockSegment[] set = row.getCurrentSet();
                 int size = set.length;
 
-                double totalWidth = 700.0;
-                double boxHeight = 85.0;
+                double totalWidth = 840.0;
+                double boxHeight = 110.0;
                 double boxWidth = totalWidth / size;
                 double startX = (canvas.getWidth() - totalWidth) / 2.0;
                 double startY = (canvas.getHeight() - boxHeight) / 2.0;
@@ -1735,12 +1802,12 @@ public class ChromaCascadeApp extends Application {
                 // 1. Draw dashed active sub-array boundary
                 if (activeLeft != -1 && activeRight != -1 && model.getFreezeFrames() <= 0) {
                     if (targetAlgo.equalsIgnoreCase("Merge Sort")) {
-                        // Draw Subarray A frame (upper level: startY - 60)
+                        // Draw Subarray A frame (upper level: startY - 70)
                         if (mid != -1 && mid >= activeLeft) {
                             double ax1 = startX + activeLeft * boxWidth + 2;
                             double ax2 = startX + (mid + 1) * boxWidth - 2;
-                            double ay1 = startY - 60 - 10;
-                            double ay2 = startY - 60 + boxHeight + 10;
+                            double ay1 = startY - 70 - 10;
+                            double ay2 = startY - 70 + boxHeight + 10;
 
                             gc.setStroke(theme.accent.deriveColor(0, 1, 1, 0.6));
                             gc.setLineWidth(1.2);
@@ -1753,12 +1820,12 @@ public class ChromaCascadeApp extends Application {
                             gc.fillText("SUBARRAY A (SORTED)", ax1 + 6, ay1 - 4);
                         }
 
-                        // Draw Subarray B frame (upper level: startY - 60)
+                        // Draw Subarray B frame (upper level: startY - 70)
                         if (mid != -1 && activeRight >= mid + 1) {
                             double bx1 = startX + (mid + 1) * boxWidth + 2;
                             double bx2 = startX + (activeRight + 1) * boxWidth - 2;
-                            double by1 = startY - 60 - 10;
-                            double by2 = startY - 60 + boxHeight + 10;
+                            double by1 = startY - 70 - 10;
+                            double by2 = startY - 70 + boxHeight + 10;
 
                             gc.setStroke(theme.accent.deriveColor(0, 1, 1, 0.6));
                             gc.setLineWidth(1.2);
@@ -1771,11 +1838,11 @@ public class ChromaCascadeApp extends Application {
                             gc.fillText("SUBARRAY B (SORTED)", bx1 + 6, by1 - 4);
                         }
 
-                        // Draw Merged Output frame (lower level: startY + 60)
+                        // Draw Merged Output frame (lower level: startY + 70)
                         double ox1 = startX + activeLeft * boxWidth + 2;
                         double ox2 = startX + (activeRight + 1) * boxWidth - 2;
-                        double oy1 = startY + 60 - 10;
-                        double oy2 = startY + 60 + boxHeight + 10;
+                        double oy1 = startY + 70 - 10;
+                        double oy2 = startY + 70 + boxHeight + 10;
 
                         gc.setStroke(theme.sorted.deriveColor(0, 1, 1, 0.6));
                         gc.setLineWidth(1.2);
@@ -1812,9 +1879,9 @@ public class ChromaCascadeApp extends Application {
                     double targetY = startY;
                     if (targetAlgo.equalsIgnoreCase("Merge Sort") && activeLeft != -1 && activeRight != -1 && model.getFreezeFrames() <= 0) {
                         if (i >= activeLeft && i < mergeTarget) {
-                            targetY = startY + 60;
+                            targetY = startY + 70;
                         } else if (i >= mergeTarget && i <= activeRight) {
-                            targetY = startY - 60;
+                            targetY = startY - 70;
                         }
                     }
 
@@ -1912,18 +1979,18 @@ public class ChromaCascadeApp extends Application {
 
                     // Accessibility checkmark pill for sorted elements
                     if (isSorted && model.isSymbolAccessibilityMode()) {
-                        double checkW = 16.0;
-                        double checkH = 14.0;
-                        double checkX = rendX + 4;
-                        double checkY = rendY + 4;
+                        double checkW = 18.0;
+                        double checkH = 16.0;
+                        double checkX = rendX + 5;
+                        double checkY = rendY + 5;
                         gc.setFill(isGameBoy ? theme.panelBg : Color.web("#0f172a", 0.85));
                         gc.fillRoundRect(checkX, checkY, checkW, checkH, 3, 3);
                         gc.setStroke(theme.sorted);
                         gc.setLineWidth(1.0);
                         gc.strokeRoundRect(checkX, checkY, checkW, checkH, 3, 3);
                         gc.setFill(theme.sorted);
-                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
-                        gc.fillText("✓", checkX + 3.5, checkY + 10.5);
+                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 11, isGameBoy));
+                        gc.fillText("✓", checkX + 4.0, checkY + 12.0);
                     }
 
                     // Selection cursor highlight
@@ -1941,55 +2008,56 @@ public class ChromaCascadeApp extends Application {
                     // Draw Badges above blocks
                     if (isPivot) {
                         String pivotText = model.isSymbolAccessibilityMode() ? "★ PIVOT" : "PIVOT";
-                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 52.0 : 42.0);
+                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 60.0 : 48.0);
                         double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(Color.web("#ea580c"));
-                        gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
+                        gc.fillRoundRect(badgeX, rendY - 20, badgeW, 15, 3, 3);
                         gc.setFill(Color.WHITE);
-                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        double ptOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 25) / 2.0;
-                        gc.fillText(pivotText, badgeX + ptOffset, rendY - 8);
+                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                        double ptOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 28) / 2.0;
+                        gc.fillText(pivotText, badgeX + ptOffset, rendY - 9);
                     } else if (isHeadA) {
                         String headText = model.isSymbolAccessibilityMode() ? "▲ HEAD A" : "HEAD A";
-                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 54.0 : 42.0);
+                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 62.0 : 50.0);
                         double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(theme.accent);
-                        gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
+                        gc.fillRoundRect(badgeX, rendY - 20, badgeW, 15, 3, 3);
                         gc.setFill(Color.WHITE);
-                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        double htOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 30) / 2.0;
-                        gc.fillText(headText, badgeX + htOffset, rendY - 8);
+                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                        double htOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 34) / 2.0;
+                        gc.fillText(headText, badgeX + htOffset, rendY - 9);
                     } else if (isHeadB) {
                         String headText = model.isSymbolAccessibilityMode() ? "▲ HEAD B" : "HEAD B";
-                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 54.0 : 42.0);
+                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 62.0 : 50.0);
                         double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(theme.accent);
-                        gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
+                        gc.fillRoundRect(badgeX, rendY - 20, badgeW, 15, 3, 3);
                         gc.setFill(Color.WHITE);
-                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        double htOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 30) / 2.0;
-                        gc.fillText(headText, badgeX + htOffset, rendY - 8);
+                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                        double htOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 34) / 2.0;
+                        gc.fillText(headText, badgeX + htOffset, rendY - 9);
                     }
 
                     // Centered raw integer value
                     gc.setFill(theme.text);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 20, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 26, isGameBoy));
                     String valStr = String.valueOf(segment.getRawValue());
-                    double charWidth = isGameBoy ? 12.0 : 10.0;
+                    double charWidth = isGameBoy ? 15.0 : 13.0;
                     double textWidth = charWidth * valStr.length();
+                    double valY = rendY + rendH * 0.58;
                     if (model.isSymbolAccessibilityMode()) {
                         gc.setStroke(isGameBoy ? theme.bg : Color.web("#050811"));
                         gc.setLineWidth(2.5);
-                        gc.strokeText(valStr, rendX + (rendW - textWidth) / 2.0, rendY + 46);
+                        gc.strokeText(valStr, rendX + (rendW - textWidth) / 2.0, valY);
                     }
-                    gc.fillText(valStr, rendX + (rendW - textWidth) / 2.0, rendY + 46);
+                    gc.fillText(valStr, rendX + (rendW - textWidth) / 2.0, valY);
 
                     // Weight detail
                     String weightStr = String.format("%.1f", segment.calculateSortWeight());
-                    gc.setFont(getThemeFont("Consolas", FontWeight.NORMAL, 9.0, isGameBoy));
+                    gc.setFont(getThemeFont("Consolas", FontWeight.BOLD, 11.0, isGameBoy));
                     gc.setFill(theme.textMuted.deriveColor(0, 1, 1, 0.8));
-                    double wStrWidth = 5.5 * weightStr.length();
-                    gc.fillText(weightStr, rendX + (rendW - wStrWidth) / 2.0, rendY + rendH - 6);
+                    double wStrWidth = 6.8 * weightStr.length();
+                    gc.fillText(weightStr, rendX + (rendW - wStrWidth) / 2.0, rendY + rendH - 8);
                 }
 
                 // Draw greater than / less than comparison badge between Quick Sort cursor and pivot
@@ -1999,7 +2067,7 @@ public class ChromaCascadeApp extends Application {
                         double cx = startX + cursorIdx * boxWidth + boxWidth / 2.0;
                         double px = startX + pivotIndex * boxWidth + boxWidth / 2.0;
                         double midX = (cx + px) / 2.0;
-                        double midY = startY - 35;
+                        double midY = startY - 42;
 
                         int valCursor = set[cursorIdx].getRawValue();
                         int valPivot = set[pivotIndex].getRawValue();
@@ -2013,15 +2081,15 @@ public class ChromaCascadeApp extends Application {
                         // Draw operator circle background
                         gc.setFill(theme.bg);
                         gc.setStroke(theme.accent);
-                        gc.setLineWidth(1.5);
-                        gc.fillOval(midX - 15, midY - 15, 30, 30);
-                        gc.strokeOval(midX - 15, midY - 15, 30, 30);
+                        gc.setLineWidth(1.8);
+                        gc.fillOval(midX - 18, midY - 18, 36, 36);
+                        gc.strokeOval(midX - 18, midY - 18, 36, 36);
 
                         // Draw operator text
                         gc.setFill(theme.accent);
-                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 16, isGameBoy));
-                        double opOffsetX = isGameBoy ? -4.0 : -5.5;
-                        double opOffsetY = isGameBoy ? 4.0 : 5.5;
+                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 18, isGameBoy));
+                        double opOffsetX = isGameBoy ? -5.0 : -6.5;
+                        double opOffsetY = isGameBoy ? 5.0 : 6.5;
                         gc.fillText(op, midX + opOffsetX, midY + opOffsetY);
                     }
                 }
@@ -2029,48 +2097,48 @@ public class ChromaCascadeApp extends Application {
                 // 2. Draw target slot pointer arrow
                 if (mergeTarget != -1 && model.getFreezeFrames() <= 0) {
                     double arrowX = startX + mergeTarget * boxWidth + boxWidth / 2.0;
-                    double arrowYHead = startY - 8;
-                    double arrowYTail = startY - 26;
+                    double arrowYHead = startY - 10;
+                    double arrowYTail = startY - 32;
                     if (targetAlgo.equalsIgnoreCase("Merge Sort")) {
-                        arrowYHead = startY + 60 - 8;
-                        arrowYTail = startY + 60 - 26;
+                        arrowYHead = startY + 70 - 10;
+                        arrowYTail = startY + 70 - 32;
                     }
 
                     gc.setStroke(modeAccent);
-                    gc.setLineWidth(2.5);
+                    gc.setLineWidth(3.0);
                     gc.strokeLine(arrowX, arrowYTail, arrowX, arrowYHead);
 
-                    gc.strokeLine(arrowX - 4, arrowYHead - 4, arrowX, arrowYHead);
-                    gc.strokeLine(arrowX + 4, arrowYHead - 4, arrowX, arrowYHead);
+                    gc.strokeLine(arrowX - 5, arrowYHead - 5, arrowX, arrowYHead);
+                    gc.strokeLine(arrowX + 5, arrowYHead - 5, arrowX, arrowYHead);
 
                     gc.setFill(modeAccent);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 10, isGameBoy));
                     String targetLabel = "TARGET SLOT";
-                    double labelOffset = isGameBoy ? -36 : -28;
-                    gc.fillText(targetLabel, arrowX + labelOffset, arrowYTail - 4);
+                    double labelOffset = isGameBoy ? -40 : -32;
+                    gc.fillText(targetLabel, arrowX + labelOffset, arrowYTail - 5);
                 }
             }
 
             // Draw completed wave banner overlay
             if (model.getFreezeFrames() > 0) {
-                double overlayY = (canvas.getHeight() - 100.0) / 2.0;
+                double overlayY = (canvas.getHeight() - 110.0) / 2.0;
                 gc.setFill(theme.bg.deriveColor(0, 1, 1, 0.9));
-                gc.fillRect(10, overlayY, canvas.getWidth() - 20, 100);
+                gc.fillRect(10, overlayY, canvas.getWidth() - 20, 110);
 
                 gc.setStroke(theme.sorted.deriveColor(0, 1, 1, 0.8));
                 gc.setLineWidth(1.5);
-                gc.strokeRect(10, overlayY, canvas.getWidth() - 20, 100);
+                gc.strokeRect(10, overlayY, canvas.getWidth() - 20, 110);
 
                 gc.setFill(theme.sorted);
-                gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 22, isGameBoy));
+                gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 24, isGameBoy));
                 String bannerMsg = "WAVE COMPLETED!";
-                double msgCharW = isGameBoy ? 16.0 : 14.0;
-                gc.fillText(bannerMsg, (canvas.getWidth() - msgCharW * bannerMsg.length()) / 2.0, overlayY + 44);
+                double msgCharW = isGameBoy ? 17.0 : 15.0;
+                gc.fillText(bannerMsg, (canvas.getWidth() - msgCharW * bannerMsg.length()) / 2.0, overlayY + 48);
 
                 gc.setFill(theme.text);
-                gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 13, isGameBoy));
-                double promptOffset = isGameBoy ? -120 : -80;
-                gc.fillText("Generating next scrambled set...", canvas.getWidth() / 2.0 + promptOffset, overlayY + 74);
+                gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 14, isGameBoy));
+                double promptOffset = isGameBoy ? -130 : -90;
+                gc.fillText("Generating next scrambled set...", canvas.getWidth() / 2.0 + promptOffset, overlayY + 80);
             }
 
             // Draw Game Over Screen Mask
@@ -2078,121 +2146,132 @@ public class ChromaCascadeApp extends Application {
                 gc.setFill(theme.bg.deriveColor(0, 1, 1, 0.96));
                 gc.fillRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20);
 
+                double cx = canvas.getWidth() / 2.0;
+                double cy = canvas.getHeight() / 2.0;
+
                 if (model.isEnteringInitials()) {
                     // Draw Initials Entry Box
+                    double boxW = 460;
+                    double boxH = 280;
+                    double bx = cx - boxW / 2.0;
+                    double by = cy - boxH / 2.0;
+
                     gc.setStroke(theme.accent.deriveColor(0, 1, 1, 0.8));
                     gc.setLineWidth(2.0);
-                    gc.strokeRoundRect(200, 70, 400, 260, 8, 8);
+                    gc.strokeRoundRect(bx, by, boxW, boxH, 8, 8);
                     gc.setFill(theme.panelBg.deriveColor(0, 1, 1, 0.98));
-                    gc.fillRoundRect(200, 70, 400, 260, 8, 8);
+                    gc.fillRoundRect(bx, by, boxW, boxH, 8, 8);
 
                     // Title
                     gc.setFill(theme.accent);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 22, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 24, isGameBoy));
                     String title = "NEW HIGH SCORE!";
-                    double tCharW = isGameBoy ? 8.0 : 6.5;
-                    gc.fillText(title, 400 - (title.length() * tCharW), 115);
+                    double tCharW = isGameBoy ? 8.5 : 7.0;
+                    gc.fillText(title, cx - (title.length() * tCharW), by + 50);
 
                     // Subtitle
                     gc.setFill(theme.text);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 14, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 15, isGameBoy));
                     String sub = "Score: " + model.getScore();
-                    double sCharW = isGameBoy ? 5.0 : 4.0;
-                    gc.fillText(sub, 400 - (sub.length() * sCharW), 145);
+                    double sCharW = isGameBoy ? 5.5 : 4.5;
+                    gc.fillText(sub, cx - (sub.length() * sCharW), by + 82);
 
                     gc.setFill(theme.textMuted);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 12, isGameBoy));
-                    double initLabelX = isGameBoy ? 310 : 335;
-                    gc.fillText("ENTER YOUR INITIALS", initLabelX, 180);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 13, isGameBoy));
+                    double initLabelX = isGameBoy ? cx - 90 : cx - 75;
+                    gc.fillText("ENTER YOUR INITIALS", initLabelX, by + 120);
 
                     // Draw Initials Input Boxes
                     String initials = model.getPlayerInitials();
+                    double startInitX = cx - 85;
                     for (int k = 0; k < 3; k++) {
-                        double bx = 330 + k * 55;
-                        double by = 200;
+                        double kx = startInitX + k * 60;
+                        double ky = by + 140;
                         gc.setFill(theme.border);
-                        gc.fillRoundRect(bx, by, 40, 50, 4, 4);
+                        gc.fillRoundRect(kx, ky, 48, 56, 4, 4);
                         gc.setStroke(theme.textMuted);
-                        gc.strokeRoundRect(bx, by, 40, 50, 4, 4);
+                        gc.strokeRoundRect(kx, ky, 48, 56, 4, 4);
 
                         if (k < initials.length()) {
                             gc.setFill(theme.text);
-                            gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 26, isGameBoy));
-                            double keyOffX = isGameBoy ? 8 : 11;
-                            gc.fillText(String.valueOf(initials.charAt(k)), bx + keyOffX, by + 36);
+                            gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 28, isGameBoy));
+                            double keyOffX = isGameBoy ? 11 : 14;
+                            gc.fillText(String.valueOf(initials.charAt(k)), kx + keyOffX, ky + 40);
                         } else if (k == initials.length()) {
                             // Flash cursor
                             if ((System.currentTimeMillis() / 400) % 2 == 0) {
                                 gc.setFill(theme.accent);
-                                gc.fillRect(bx + 10, by + 40, 20, 4);
+                                gc.fillRect(kx + 12, ky + 46, 24, 4);
                             }
                         }
                     }
 
                     gc.setFill(theme.textMuted);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 10, isGameBoy));
-                    double helperX = isGameBoy ? 250 : 295;
-                    gc.fillText("TYPE A-Z AND PRESS ENTER TO REGISTER", helperX, 290);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 11, isGameBoy));
+                    double helperX = isGameBoy ? cx - 145 : cx - 125;
+                    gc.fillText("TYPE A-Z AND PRESS ENTER TO REGISTER", helperX, by + 245);
                 } else {
                     // Draw Leaderboard Table Box
+                    double tableW = 580;
+                    double tableH = 360;
+                    double tx = cx - tableW / 2.0;
+                    double ty = cy - tableH / 2.0;
+
                     gc.setStroke(isGameBoy ? theme.border : Color.web("#ef4444", 0.7));
                     gc.setLineWidth(2.0);
-                    gc.strokeRoundRect(160, 50, 480, 300, 8, 8);
+                    gc.strokeRoundRect(tx, ty, tableW, tableH, 8, 8);
                     gc.setFill(theme.panelBg.deriveColor(0, 1, 1, 0.98));
-                    gc.fillRoundRect(160, 50, 480, 300, 8, 8);
+                    gc.fillRoundRect(tx, ty, tableW, tableH, 8, 8);
 
                     // Title & Grade Badge
                     gc.setFill(isGameBoy ? theme.accent : Color.web("#ef4444"));
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 20, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 22, isGameBoy));
                     String title = model.isPracticeMode() ? "PRACTICE COMPLETE" : "TIME EXPIRED";
-                    double expiredCharW = isGameBoy ? 7.5 : 6.0;
-                    gc.fillText(title, 370 - (title.length() * expiredCharW), 80);
+                    gc.fillText(title, tx + 35, ty + 42);
 
                     // Grade Badge Box
                     String grade = model.getPerformanceGrade();
                     Color gradeCol = grade.equals("S") ? Color.web("#fbbf24") : (grade.equals("A") ? Color.web("#10b981") : (grade.equals("B") ? Color.web("#3b82f6") : Color.web("#f97316")));
                     gc.setFill(theme.panelBg);
                     gc.setStroke(gradeCol);
-                    gc.setLineWidth(1.8);
-                    gc.fillRoundRect(555, 62, 68, 24, 4, 4);
-                    gc.strokeRoundRect(555, 62, 68, 24, 4, 4);
+                    gc.setLineWidth(2.0);
+                    gc.fillRoundRect(tx + tableW - 110, ty + 20, 80, 28, 4, 4);
+                    gc.strokeRoundRect(tx + tableW - 110, ty + 20, 80, 28, 4, 4);
                     gc.setFill(gradeCol);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 10, isGameBoy));
-                    gc.fillText("RANK " + grade, 562, 78);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 12, isGameBoy));
+                    gc.fillText("RANK " + grade, tx + tableW - 98, ty + 39);
 
                     // Performance Report Card Subtitle
                     gc.setFill(theme.text);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 11, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.NORMAL, 12, isGameBoy));
                     String sub = String.format("Score: %d | Waves: %d | Accuracy: %.1f%% | Avg Time: %dms", 
                         model.getScore(), model.getCompletedWavesCount(), model.getAccuracyRate(), model.getAverageDecisionTimeMs());
-                    double expiredSubW = isGameBoy ? 4.5 : 3.5;
-                    gc.fillText(sub, 400 - (sub.length() * expiredSubW), 104);
+                    gc.fillText(sub, tx + 35, ty + 72);
 
                     // Mini Operations Summary
                     gc.setFill(theme.textMuted);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 10, isGameBoy));
                     String opsStr = String.format("TOTAL SWAPS: %d  |  CORRECT: %d  |  MISTAKES: %d", 
                         model.getTotalCorrectMoves(), model.getTotalCorrectMoves(), model.getTotalIncorrectMoves());
-                    double opsW = isGameBoy ? 4.0 : 3.0;
-                    gc.fillText(opsStr, 400 - (opsStr.length() * opsW), 122);
+                    gc.fillText(opsStr, tx + 35, ty + 94);
 
                     // Headers
                     gc.setFill(theme.textMuted);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 11, isGameBoy));
-                    gc.fillText("RANK", 190, 148);
-                    gc.fillText("NAME", 260, 148);
-                    gc.fillText("SCORE", 380, 148);
-                    gc.fillText("DATE", 490, 148);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 12, isGameBoy));
+                    gc.fillText("RANK", tx + 35, ty + 128);
+                    gc.fillText("NAME", tx + 120, ty + 128);
+                    gc.fillText("SCORE", tx + 280, ty + 128);
+                    gc.fillText("DATE", tx + 430, ty + 128);
 
                     gc.setStroke(theme.border);
                     gc.setLineWidth(1.0);
-                    gc.strokeLine(180, 155, 620, 155);
+                    gc.strokeLine(tx + 25, ty + 138, tx + tableW - 25, ty + 138);
 
                     // Render Top 5 Scores
                     java.util.List<LeaderboardManager.Entry> top = LeaderboardManager.getTopScores(model.getTargetAlgorithm(), 5);
                     for (int idx = 0; idx < top.size(); idx++) {
                         LeaderboardManager.Entry ent = top.get(idx);
-                        double ry = 175 + idx * 26;
+                        double ry = ty + 164 + idx * 30;
                         
                         boolean highlight = false;
                         // Match if the entry is the player's new score
@@ -2202,21 +2281,21 @@ public class ChromaCascadeApp extends Application {
 
                         Color rowColor = highlight ? theme.accent : theme.text;
                         gc.setFill(rowColor);
-                        gc.setFont(getThemeFont("Consolas", highlight ? FontWeight.BOLD : FontWeight.NORMAL, 12, isGameBoy));
+                        gc.setFont(getThemeFont("Consolas", highlight ? FontWeight.BOLD : FontWeight.NORMAL, 13, isGameBoy));
                         
-                        gc.fillText(String.format("%02d", idx + 1), 195, ry);
-                        gc.fillText(ent.name, 265, ry);
-                        gc.fillText(String.format("%05d", ent.score), 380, ry);
-                        gc.fillText(ent.date, 490, ry);
+                        gc.fillText(String.format("%02d", idx + 1), tx + 40, ry);
+                        gc.fillText(ent.name, tx + 125, ry);
+                        gc.fillText(String.format("%05d", ent.score), tx + 280, ry);
+                        gc.fillText(ent.date, tx + 430, ry);
                     }
 
                     gc.setStroke(theme.border);
-                    gc.strokeLine(180, 305, 620, 305);
+                    gc.strokeLine(tx + 25, ty + 316, tx + tableW - 25, ty + 316);
 
                     gc.setFill(theme.textMuted);
-                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 11, isGameBoy));
-                    double restartHelpX = isGameBoy ? 245 : 295;
-                    gc.fillText("Press R to Restart | ESC to Main Menu", restartHelpX, 328);
+                    gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 12, isGameBoy));
+                    double restartHelpX = isGameBoy ? cx - 170 : cx - 140;
+                    gc.fillText("Press R to Restart | ESC to Main Menu", restartHelpX, ty + 342);
                 }
             }
 
@@ -2674,7 +2753,7 @@ public class ChromaCascadeApp extends Application {
             model.setLastMoveTimestamp(now);
             
             // Calculate coordinates for particle burst
-            double totalWidth = 700.0;
+            double totalWidth = 840.0;
             double boxWidth = totalWidth / set.length;
             double startX = (view.getCanvas().getWidth() - totalWidth) / 2.0;
             double px = startX + cursor * boxWidth + boxWidth / 2.0;
@@ -3095,52 +3174,176 @@ public class ChromaCascadeApp extends Application {
         themeCb.setValue("Classic Neon");
         themeBox.getChildren().addAll(themeLabel, themeCb);
 
-        // Sound & CRT Settings Row
-        HBox settingsRow = new HBox(20);
-        settingsRow.setAlignment(Pos.CENTER);
-
-        CheckBox crtCb = new CheckBox("CRT SCANLINES [C]");
-        crtCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
-        crtCb.setSelected(view.isCrtEnabled());
-        crtCb.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            view.setCrtEnabled(newVal);
-        });
-
-        CheckBox symbolsCb = new CheckBox("SYMBOLS [V]");
-        symbolsCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
-        symbolsCb.setSelected(model.isSymbolAccessibilityMode());
-        symbolsCb.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            model.setSymbolAccessibilityMode(newVal);
-        });
-
-        Label volLabel = new Label("VOL:");
-        volLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px;");
-
-        Slider volSlider = new Slider(0, 100, SoundManager.getMasterVolume() * 100);
-        volSlider.setPrefWidth(85);
-        volSlider.setStyle("-fx-cursor: hand;");
-        volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            SoundManager.setMasterVolume(newVal.doubleValue() / 100.0);
-        });
-
-        CheckBox muteCb = new CheckBox("MUTE [M]");
-        muteCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
-        muteCb.setSelected(SoundManager.isMuted());
-        muteCb.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            SoundManager.setMuted(newVal);
-        });
-
-        settingsRow.getChildren().addAll(crtCb, symbolsCb, volLabel, volSlider, muteCb);
+        // Settings & Options Button on Main Menu
+        Button settingsBtn = new Button("SETTINGS & OPTIONS");
 
         Button leaderboardBtn = new Button("HIGH SCORES");
-        leaderboardBtn.setStyle("-fx-background-color: #1e293b; -fx-text-fill: #f8fafc; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12px 30px; -fx-background-radius: 6px; -fx-border-color: #334155; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-min-width: 280; -fx-cursor: hand;");
-        leaderboardBtn.setOnMouseEntered(e -> leaderboardBtn.setStyle("-fx-background-color: #a855f7; -fx-text-fill: #ffffff; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12px 30px; -fx-background-radius: 6px; -fx-border-color: #a855f7; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-min-width: 280; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(168,85,247,0.3), 8, 0, 0, 0);"));
-        leaderboardBtn.setOnMouseExited(e -> leaderboardBtn.setStyle("-fx-background-color: #1e293b; -fx-text-fill: #f8fafc; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12px 30px; -fx-background-radius: 6px; -fx-border-color: #334155; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-min-width: 280; -fx-cursor: hand;"));
 
         Label menuGuide = new Label("Press ESC to Quit Game");
         menuGuide.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 12px; -fx-text-fill: #475569; -fx-padding: 10px 0 0 0;");
 
-        menuLayout.getChildren().addAll(menuTitle, menuSubtitle, selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, practiceModeCb, themeBox, settingsRow, leaderboardBtn, menuGuide);
+        menuLayout.getChildren().addAll(menuTitle, menuSubtitle, selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, practiceModeCb, settingsBtn, leaderboardBtn, menuGuide);
+
+        // Dedicated Settings & Options Screen Layout
+        VBox settingsLayout = new VBox(25);
+        settingsLayout.setAlignment(Pos.CENTER);
+        settingsLayout.setPadding(new Insets(30));
+        settingsLayout.setStyle("-fx-background-color: #0b0f19;");
+
+        Label settingsTitle = new Label("SETTINGS & DISPLAY");
+
+        HBox settingsPanels = new HBox(30);
+        settingsPanels.setAlignment(Pos.CENTER);
+
+        // Panel 1: Display & Video Settings
+        VBox dispCard = new VBox(15);
+        dispCard.setAlignment(Pos.CENTER_LEFT);
+        dispCard.setPadding(new Insets(20));
+        dispCard.setPrefWidth(400);
+        dispCard.setStyle("-fx-background-color: #1e293b; -fx-border-color: #334155; -fx-border-width: 1.5px; -fx-background-radius: 8px; -fx-border-radius: 8px;");
+
+        Label dispHead = new Label("DISPLAY & VIDEO");
+        dispHead.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;");
+
+        // Window Mode Row
+        HBox winModeRow = new HBox(12);
+        winModeRow.setAlignment(Pos.CENTER_LEFT);
+        Label winModeLbl = new Label("WINDOW MODE:");
+        winModeLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 13px; -fx-min-width: 130;");
+        Button winModeToggleBtn = new Button(DisplaySettings.isFullscreen ? "FULLSCREEN" : "WINDOWED");
+        winModeToggleBtn.setStyle("-fx-background-color: #0284c7; -fx-text-fill: #ffffff; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 7px 18px; -fx-background-radius: 4px; -fx-cursor: hand;");
+
+        winModeRow.getChildren().addAll(winModeLbl, winModeToggleBtn);
+
+        // Resolution Row
+        HBox resRow = new HBox(12);
+        resRow.setAlignment(Pos.CENTER_LEFT);
+        Label resLbl = new Label("RESOLUTION:");
+        resLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 13px; -fx-min-width: 130;");
+        ComboBox<String> resCb = new ComboBox<>();
+        resCb.getItems().addAll("1920x1080", "1600x900", "1366x768", "1280x720");
+        resCb.setValue(DisplaySettings.currentResolution);
+        resCb.setStyle("-fx-background-color: #0f172a; -fx-text-fill: #f8fafc; -fx-border-color: #475569; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        resRow.getChildren().addAll(resLbl, resCb);
+
+        winModeToggleBtn.setOnAction(e -> {
+            SoundManager.playClick();
+            boolean newFs = !DisplaySettings.isFullscreen;
+            String[] dims = resCb.getValue().split("x");
+            int w = Integer.parseInt(dims[0]);
+            int h = Integer.parseInt(dims[1]);
+            DisplaySettings.apply(DisplaySettings.primaryStageRef, newFs, w, h);
+            winModeToggleBtn.setText(newFs ? "FULLSCREEN" : "WINDOWED");
+        });
+
+        resCb.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                String[] dims = newVal.split("x");
+                int w = Integer.parseInt(dims[0]);
+                int h = Integer.parseInt(dims[1]);
+                DisplaySettings.apply(DisplaySettings.primaryStageRef, DisplaySettings.isFullscreen, w, h);
+            }
+        });
+
+        // Theme Row
+        HBox themeRow = new HBox(12);
+        themeRow.setAlignment(Pos.CENTER_LEFT);
+        themeRow.getChildren().addAll(themeLabel, themeCb);
+
+        // Graphics Checkboxes Row
+        HBox gfxRow = new HBox(18);
+        gfxRow.setAlignment(Pos.CENTER_LEFT);
+        CheckBox crtToggle = new CheckBox("CRT SCANLINES [C]");
+        crtToggle.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
+        crtToggle.setSelected(view.isCrtEnabled());
+        crtToggle.selectedProperty().addListener((obs, oldVal, newVal) -> view.setCrtEnabled(newVal));
+
+        CheckBox symbolsToggle = new CheckBox("SYMBOLS [V]");
+        symbolsToggle.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
+        symbolsToggle.setSelected(model.isSymbolAccessibilityMode());
+        symbolsToggle.selectedProperty().addListener((obs, oldVal, newVal) -> model.setSymbolAccessibilityMode(newVal));
+
+        gfxRow.getChildren().addAll(crtToggle, symbolsToggle);
+        dispCard.getChildren().addAll(dispHead, winModeRow, resRow, themeRow, gfxRow);
+
+        // Panel 2: Audio Synthesizer Settings
+        VBox audioCard = new VBox(15);
+        audioCard.setAlignment(Pos.CENTER_LEFT);
+        audioCard.setPadding(new Insets(20));
+        audioCard.setPrefWidth(400);
+        audioCard.setStyle("-fx-background-color: #1e293b; -fx-border-color: #334155; -fx-border-width: 1.5px; -fx-background-radius: 8px; -fx-border-radius: 8px;");
+
+        Label audioHead = new Label("AUDIO SYNTHESIZER");
+        audioHead.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;");
+
+        // Master Volume Row
+        HBox masterVolRow = new HBox(10);
+        masterVolRow.setAlignment(Pos.CENTER_LEFT);
+        Label masterLbl = new Label("MASTER VOL: " + (int)(SoundManager.getMasterVolume() * 100) + "%");
+        masterLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-min-width: 140;");
+        Slider masterSlider = new Slider(0, 100, SoundManager.getMasterVolume() * 100);
+        masterSlider.setPrefWidth(180);
+        masterSlider.setStyle("-fx-cursor: hand;");
+        masterSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int p = newVal.intValue();
+            SoundManager.setMasterVolume(p / 100.0);
+            masterLbl.setText("MASTER VOL: " + p + "%");
+        });
+        masterVolRow.getChildren().addAll(masterLbl, masterSlider);
+
+        // Music (BGM) Volume Row
+        HBox bgmVolRow = new HBox(10);
+        bgmVolRow.setAlignment(Pos.CENTER_LEFT);
+        Label bgmLbl = new Label("MUSIC (BGM): " + (int)(SoundManager.getMusicVolume() * 100) + "%");
+        bgmLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-min-width: 140;");
+        Slider bgmSlider = new Slider(0, 100, SoundManager.getMusicVolume() * 100);
+        bgmSlider.setPrefWidth(180);
+        bgmSlider.setStyle("-fx-cursor: hand;");
+        bgmSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int p = newVal.intValue();
+            SoundManager.setMusicVolume(p / 100.0);
+            bgmLbl.setText("MUSIC (BGM): " + p + "%");
+        });
+        bgmVolRow.getChildren().addAll(bgmLbl, bgmSlider);
+
+        // Sound Effects (SFX) Volume Row
+        HBox sfxVolRow = new HBox(10);
+        sfxVolRow.setAlignment(Pos.CENTER_LEFT);
+        Label sfxLbl = new Label("EFFECTS (SFX): " + (int)(SoundManager.getSfxVolume() * 100) + "%");
+        sfxLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-min-width: 140;");
+        Slider sfxSlider = new Slider(0, 100, SoundManager.getSfxVolume() * 100);
+        sfxSlider.setPrefWidth(180);
+        sfxSlider.setStyle("-fx-cursor: hand;");
+        sfxSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int p = newVal.intValue();
+            SoundManager.setSfxVolume(p / 100.0);
+            sfxLbl.setText("EFFECTS (SFX): " + p + "%");
+        });
+        sfxVolRow.getChildren().addAll(sfxLbl, sfxSlider);
+
+        // Audio Mute Row
+        CheckBox audioMuteCb = new CheckBox("MUTE ALL AUDIO [M]");
+        audioMuteCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
+        audioMuteCb.setSelected(SoundManager.isMuted());
+        audioMuteCb.selectedProperty().addListener((obs, oldVal, newVal) -> SoundManager.setMuted(newVal));
+
+        audioCard.getChildren().addAll(audioHead, masterVolRow, bgmVolRow, sfxVolRow, audioMuteCb);
+
+        settingsPanels.getChildren().addAll(dispCard, audioCard);
+
+        Button settingsBackBtn = new Button("BACK TO MENU");
+        settingsBackBtn.setOnAction(e -> {
+            SoundManager.playMenuSelect();
+            rootContainer.getChildren().setAll(menuLayout);
+        });
+
+        settingsLayout.getChildren().addAll(settingsTitle, settingsPanels, settingsBackBtn);
+
+        settingsBtn.setOnAction(e -> {
+            SoundManager.playMenuSelect();
+            rootContainer.getChildren().setAll(settingsLayout);
+        });
 
         // Leaderboards Layout
         VBox leaderboardLayout = new VBox(20);
@@ -3216,15 +3419,15 @@ public class ChromaCascadeApp extends Application {
 
         // Top HUD Header with spacing above blocks
         VBox topHud = new VBox(8);
-        topHud.setPadding(new Insets(30, 0, 30, 0)); // 30px spacing above blocks
+        topHud.setPadding(new Insets(15, 0, 10, 0)); // Sleek balanced spacing
         topHud.setAlignment(Pos.CENTER);
 
         Label modeLabel = new Label("MODE: SELECTION SORT | WAVE: 1");
-        modeLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 12px; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-letter-spacing: 1.5;");
+        modeLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 14px; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-letter-spacing: 1.5;");
         view.setTargetValLabel(modeLabel);
 
         Label timerVal = new Label("20s");
-        timerVal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 44px; -fx-text-fill: #f59e0b; -fx-font-weight: bold;");
+        timerVal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 48px; -fx-text-fill: #f59e0b; -fx-font-weight: bold;");
         view.setTimerValLabel(timerVal);
 
         Label scoreVal = new Label("SCORE: 00000");
@@ -3235,7 +3438,7 @@ public class ChromaCascadeApp extends Application {
 
         // Center Canvas Wrapper
         StackPane canvasWrapper = new StackPane();
-        canvasWrapper.setPadding(new Insets(10, 50, 10, 50));
+        canvasWrapper.setPadding(new Insets(5, 40, 5, 40));
         Canvas gameCanvas = view.getCanvas();
         canvasWrapper.getChildren().add(gameCanvas);
 
@@ -3275,15 +3478,15 @@ public class ChromaCascadeApp extends Application {
             }
         });
 
-        // Minimal HUD Log list
+        // Expanded HUD Log list
         HBox bottomPanel = new HBox();
-        bottomPanel.setPadding(new Insets(20, 50, 20, 50));
+        bottomPanel.setPadding(new Insets(10, 40, 5, 40));
         bottomPanel.setAlignment(Pos.CENTER);
 
         ListView<String> logView = new ListView<>(model.getSystemStatusLog());
-        logView.setPrefHeight(90);
-        logView.setPrefWidth(700); // Centered and expanded to match block area width
-        logView.setStyle("-fx-background-color: #0f172a; -fx-control-inner-background: #0f172a; -fx-text-fill: #e2e8f0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 11px; -fx-border-color: #1e293b; -fx-border-radius: 4px;");
+        logView.setPrefHeight(105);
+        logView.setPrefWidth(840); // Expanded to match larger canvas block area
+        logView.setStyle("-fx-background-color: #0f172a; -fx-control-inner-background: #0f172a; -fx-text-fill: #e2e8f0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 12px; -fx-border-color: #1e293b; -fx-border-radius: 4px;");
         logView.setFocusTraversable(false);
         view.setLogListView(logView);
         controller.logListView = logView;
@@ -3292,11 +3495,11 @@ public class ChromaCascadeApp extends Application {
 
         // Bottom Controls Layout Guide
         HBox controlsBar = new HBox();
-        controlsBar.setPadding(new Insets(10));
+        controlsBar.setPadding(new Insets(5));
         controlsBar.setAlignment(Pos.CENTER);
         Text controlGuide = new Text("CONTROLS: [A/←] [D/→] or Click Block | [ENTER/SPACE] Shift | [Z] Undo | [V] Symbols | [M] Mute | [C] CRT | [R] Restart | [ESC] Pause");
         controlGuide.setFill(Color.web("#64748b"));
-        controlGuide.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-style: italic; -fx-font-size: 11px;");
+        controlGuide.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-style: italic; -fx-font-size: 12px;");
         controlsBar.getChildren().add(controlGuide);
 
         gameLayout.getChildren().addAll(topHud, canvasWrapper, bottomPanel, controlsBar);
@@ -3308,7 +3511,8 @@ public class ChromaCascadeApp extends Application {
                 applyTheme(newVal, rootContainer, menuLayout, leaderboardLayout, gameLayout, 
                     menuTitle, menuSubtitle, themeLabel, themeCb, practiceModeCb, 
                     lbTitle, backBtn, logView, timerVal, scoreVal, modeLabel, controlGuide, 
-                    selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, leaderboardBtn);
+                    selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, leaderboardBtn,
+                    settingsBtn, settingsLayout, settingsTitle, settingsBackBtn);
             }
         });
 
@@ -3316,7 +3520,8 @@ public class ChromaCascadeApp extends Application {
         applyTheme("Classic Neon", rootContainer, menuLayout, leaderboardLayout, gameLayout, 
             menuTitle, menuSubtitle, themeLabel, themeCb, practiceModeCb, 
             lbTitle, backBtn, logView, timerVal, scoreVal, modeLabel, controlGuide, 
-            selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, leaderboardBtn);
+            selectionBtn, quickBtn, mergeBtn, bubbleBtn, insertionBtn, leaderboardBtn,
+            settingsBtn, settingsLayout, settingsTitle, settingsBackBtn);
 
         // Add Menu Initially
         rootContainer.getChildren().add(menuLayout);
@@ -3325,11 +3530,16 @@ public class ChromaCascadeApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sort Pulse: Timed Puzzle Blitz");
 
-        // Borderless & Fullscreen Settings
-        primaryStage.initStyle(StageStyle.UNDECORATED);
-        primaryStage.setFullScreen(true);
+        // Display Settings Setup (Standard Native Decorated Window & Fullscreen Toggle)
+        DisplaySettings.primaryStageRef = primaryStage;
+        DisplaySettings.apply(primaryStage, true, 1600, 900);
         primaryStage.setFullScreenExitHint("");
         primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+
+        primaryStage.fullScreenProperty().addListener((obs, oldVal, newVal) -> {
+            DisplaySettings.isFullscreen = newVal;
+            winModeToggleBtn.setText(newVal ? "FULLSCREEN" : "WINDOWED");
+        });
 
         // Setup Mode Button actions to enter Play state
         selectionBtn.setOnAction(event -> {
@@ -6055,7 +6265,7 @@ public class ChromaCascadeApp extends Application {
                      "; -fx-text-fill: " + normalText + 
                      "; -fx-font-family: " + fontFam + 
                      "; -fx-font-weight: bold; -fx-font-size: " + fontSize + 
-                     "; -fx-padding: 12px 35px; -fx-background-radius: 6px; -fx-border-color: " + normalBorder + 
+                     "; -fx-padding: 13px 35px; -fx-min-width: 360; -fx-background-radius: 6px; -fx-border-color: " + normalBorder + 
                      "; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-cursor: hand;");
         btn.setOnMouseEntered(e -> {
             SoundManager.playHover();
@@ -6064,7 +6274,7 @@ public class ChromaCascadeApp extends Application {
                          "; -fx-text-fill: " + hoverText + 
                          "; -fx-font-family: " + fontFam + 
                          "; -fx-font-weight: bold; -fx-font-size: " + fontSize + 
-                         "; -fx-padding: 12px 35px; -fx-background-radius: 6px; -fx-border-color: " + hoverBorder + 
+                         "; -fx-padding: 13px 35px; -fx-min-width: 360; -fx-background-radius: 6px; -fx-border-color: " + hoverBorder + 
                          "; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-cursor: hand;" + glowStyle);
         });
         btn.setOnMouseExited(e -> {
@@ -6072,7 +6282,7 @@ public class ChromaCascadeApp extends Application {
                          "; -fx-text-fill: " + normalText + 
                          "; -fx-font-family: " + fontFam + 
                          "; -fx-font-weight: bold; -fx-font-size: " + fontSize + 
-                         "; -fx-padding: 12px 35px; -fx-background-radius: 6px; -fx-border-color: " + normalBorder + 
+                         "; -fx-padding: 13px 35px; -fx-min-width: 360; -fx-background-radius: 6px; -fx-border-color: " + normalBorder + 
                          "; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-cursor: hand;");
         });
     }
@@ -6092,20 +6302,20 @@ public class ChromaCascadeApp extends Application {
         overlay.setAlignment(Pos.CENTER);
         overlay.setStyle("-fx-background-color: " + (isGB ? "rgba(202, 220, 159, 0.95)" : "rgba(11, 15, 25, 0.85)") + ";");
 
-        // The card panel
+        // The enlarged card panel
         VBox card = new VBox(20);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(25, 35, 25, 35));
-        card.setMaxWidth(520);
+        card.setPadding(new Insets(30, 45, 30, 45));
+        card.setMaxWidth(620);
         card.setStyle("-fx-background-color: " + theme.panelBgHex + 
                       "; -fx-border-color: " + theme.borderHex + 
                       "; -fx-border-width: 2px; -fx-background-radius: 8px; -fx-border-radius: 8px;");
 
         Label pauseTitle = new Label("GAME PAUSED");
         if (isGB) {
-            pauseTitle.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
+            pauseTitle.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + ";");
         } else {
-            pauseTitle.setStyle("-fx-font-family: 'Segoe UI', 'Outfit', sans-serif; -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + 
+            pauseTitle.setStyle("-fx-font-family: 'Segoe UI', 'Outfit', sans-serif; -fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + 
                                 "; -fx-effect: dropshadow(three-pass-box, " + theme.accentHex + "66, 12, 0, 0, 0);");
         }
 
@@ -6116,20 +6326,23 @@ public class ChromaCascadeApp extends Application {
         String hoverText = isGB ? theme.bgHex : "#ffffff";
         String hoverBorder = isGB ? theme.textHex : theme.accentHex;
 
-        // Quick Settings: Volume, Mute, CRT, and Symbols
-        VBox settingsCard = new VBox(8);
+        // Quick Settings: Volume, BGM, SFX, Mute, Window Mode, Resolution, CRT, and Symbols
+        VBox settingsCard = new VBox(10);
         settingsCard.setAlignment(Pos.CENTER);
-        settingsCard.setPadding(new Insets(10));
+        settingsCard.setPadding(new Insets(14, 18, 14, 18));
+        settingsCard.setMaxWidth(560);
         settingsCard.setStyle("-fx-background-color: " + (isGB ? "rgba(139,172,15,0.15)" : "rgba(30,41,59,0.5)") + "; -fx-background-radius: 6px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1px; -fx-border-radius: 6px;");
 
-        HBox volRow = new HBox(8);
-        volRow.setAlignment(Pos.CENTER);
+        // Row 1: Audio Controls (Master, BGM, SFX, Mute)
+        HBox audioRow = new HBox(10);
+        audioRow.setAlignment(Pos.CENTER);
+
         int curVolPct = (int) Math.round(SoundManager.getMasterVolume() * 100);
         Label volLabel = new Label("VOL: " + curVolPct + "%");
         volLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "7px" : "11px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
 
         Slider volSlider = new Slider(0, 100, curVolPct);
-        volSlider.setPrefWidth(80);
+        volSlider.setPrefWidth(65);
         volSlider.setStyle("-fx-cursor: hand;");
         volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             int p = newVal.intValue();
@@ -6137,18 +6350,83 @@ public class ChromaCascadeApp extends Application {
             volLabel.setText("VOL: " + p + "%");
         });
 
-        Button muteBtn = new Button(SoundManager.isMuted() ? "UNMUTE" : "MUTE");
-        Button crtBtn = new Button(view.isCrtEnabled() ? "CRT: ON" : "CRT: OFF");
-        Button symbolsBtn = new Button(model.isSymbolAccessibilityMode() ? "SYMBOLS: ON" : "SYMBOLS: OFF");
+        int curBgmPct = (int) Math.round(SoundManager.getMusicVolume() * 100);
+        Label bgmLabel = new Label("BGM: " + curBgmPct + "%");
+        bgmLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "7px" : "11px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
 
+        Slider bgmSlider = new Slider(0, 100, curBgmPct);
+        bgmSlider.setPrefWidth(65);
+        bgmSlider.setStyle("-fx-cursor: hand;");
+        bgmSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int p = newVal.intValue();
+            SoundManager.setMusicVolume(p / 100.0);
+            bgmLabel.setText("BGM: " + p + "%");
+        });
+
+        int curSfxPct = (int) Math.round(SoundManager.getSfxVolume() * 100);
+        Label sfxLabel = new Label("SFX: " + curSfxPct + "%");
+        sfxLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "7px" : "11px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
+
+        Slider sfxSlider = new Slider(0, 100, curSfxPct);
+        sfxSlider.setPrefWidth(65);
+        sfxSlider.setStyle("-fx-cursor: hand;");
+        sfxSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int p = newVal.intValue();
+            SoundManager.setSfxVolume(p / 100.0);
+            sfxLabel.setText("SFX: " + p + "%");
+        });
+
+        Button muteBtn = new Button(SoundManager.isMuted() ? "UNMUTE" : "MUTE");
+        muteBtn.setStyle("-fx-padding: 4px 10px; -fx-min-width: 60;");
         setupButtonHover(muteBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#f59e0b", hoverText, isGB ? theme.textHex : "#f59e0b", isGB, fontFam, isGB ? "7px" : "10px", false, "#f59e0b");
-        setupButtonHover(crtBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#06b6d4", hoverText, isGB ? theme.textHex : "#06b6d4", isGB, fontFam, isGB ? "7px" : "10px", false, "#06b6d4");
-        setupButtonHover(symbolsBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#10b981", hoverText, isGB ? theme.textHex : "#10b981", isGB, fontFam, isGB ? "7px" : "10px", false, "#10b981");
+        muteBtn.setStyle(muteBtn.getStyle() + " -fx-min-width: 60; -fx-padding: 4px 10px;");
 
         muteBtn.setOnAction(e -> {
             SoundManager.toggleMute();
             muteBtn.setText(SoundManager.isMuted() ? "UNMUTE" : "MUTE");
         });
+
+        audioRow.getChildren().addAll(volLabel, volSlider, bgmLabel, bgmSlider, sfxLabel, sfxSlider, muteBtn);
+
+        // Row 2: Display & Graphics (Window Mode, Resolution, CRT, Symbols)
+        HBox dispRow = new HBox(12);
+        dispRow.setAlignment(Pos.CENTER);
+
+        Button winModeBtn = new Button(DisplaySettings.isFullscreen ? "FULLSCREEN" : "WINDOWED");
+        setupButtonHover(winModeBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#38bdf8", hoverText, isGB ? theme.textHex : "#38bdf8", isGB, fontFam, isGB ? "7px" : "10px", false, "#38bdf8");
+        winModeBtn.setStyle(winModeBtn.getStyle() + " -fx-min-width: 100; -fx-padding: 4px 10px;");
+
+        ComboBox<String> pauseResCb = new ComboBox<>();
+        pauseResCb.getItems().addAll("1920x1080", "1600x900", "1366x768", "1280x720");
+        pauseResCb.setValue(DisplaySettings.currentResolution);
+        pauseResCb.setStyle("-fx-background-color: " + normalBg + "; -fx-text-fill: " + normalText + "; -fx-border-color: " + normalBorder + "; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "7px" : "10px") + "; -fx-cursor: hand;");
+
+        winModeBtn.setOnAction(e -> {
+            SoundManager.playClick();
+            boolean newFs = !DisplaySettings.isFullscreen;
+            String[] dims = pauseResCb.getValue().split("x");
+            int w = Integer.parseInt(dims[0]);
+            int h = Integer.parseInt(dims[1]);
+            DisplaySettings.apply(DisplaySettings.primaryStageRef, newFs, w, h);
+            winModeBtn.setText(newFs ? "FULLSCREEN" : "WINDOWED");
+        });
+
+        pauseResCb.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                String[] dims = newVal.split("x");
+                int w = Integer.parseInt(dims[0]);
+                int h = Integer.parseInt(dims[1]);
+                DisplaySettings.apply(DisplaySettings.primaryStageRef, DisplaySettings.isFullscreen, w, h);
+            }
+        });
+
+        Button crtBtn = new Button(view.isCrtEnabled() ? "CRT: ON" : "CRT: OFF");
+        Button symbolsBtn = new Button(model.isSymbolAccessibilityMode() ? "SYMBOLS: ON" : "SYMBOLS: OFF");
+
+        setupButtonHover(crtBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#06b6d4", hoverText, isGB ? theme.textHex : "#06b6d4", isGB, fontFam, isGB ? "7px" : "10px", false, "#06b6d4");
+        setupButtonHover(symbolsBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#10b981", hoverText, isGB ? theme.textHex : "#10b981", isGB, fontFam, isGB ? "7px" : "10px", false, "#10b981");
+        crtBtn.setStyle(crtBtn.getStyle() + " -fx-min-width: 80; -fx-padding: 4px 10px;");
+        symbolsBtn.setStyle(symbolsBtn.getStyle() + " -fx-min-width: 100; -fx-padding: 4px 10px;");
 
         crtBtn.setOnAction(e -> {
             view.toggleCrt();
@@ -6161,8 +6439,8 @@ public class ChromaCascadeApp extends Application {
             SoundManager.playClick();
         });
 
-        volRow.getChildren().addAll(volLabel, volSlider, muteBtn, crtBtn, symbolsBtn);
-        settingsCard.getChildren().add(volRow);
+        dispRow.getChildren().addAll(winModeBtn, pauseResCb, crtBtn, symbolsBtn);
+        settingsCard.getChildren().addAll(audioRow, dispRow);
 
         VBox buttonContainer = new VBox(15);
         buttonContainer.setAlignment(Pos.CENTER);
@@ -6172,10 +6450,10 @@ public class ChromaCascadeApp extends Application {
         Button restartBtn = new Button("RESTART");
         Button leaveBtn = new Button("LEAVE");
 
-        setupButtonHover(resumeBtn, normalBg, normalText, normalBorder, hoverBg, hoverText, hoverBorder, isGB, fontFam, isGB ? "9px" : "14px", true, theme.accentHex);
-        setupButtonHover(rulesBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#8b5cf6", hoverText, isGB ? theme.textHex : "#8b5cf6", isGB, fontFam, isGB ? "9px" : "14px", true, "#8b5cf6");
-        setupButtonHover(restartBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#3b82f6", hoverText, isGB ? theme.textHex : "#3b82f6", isGB, fontFam, isGB ? "9px" : "14px", true, "#3b82f6");
-        setupButtonHover(leaveBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#ef4444", hoverText, isGB ? theme.textHex : "#ef4444", isGB, fontFam, isGB ? "9px" : "14px", true, "#ef4444");
+        setupButtonHover(resumeBtn, normalBg, normalText, normalBorder, hoverBg, hoverText, hoverBorder, isGB, fontFam, isGB ? "10px" : "15px", true, theme.accentHex);
+        setupButtonHover(rulesBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#8b5cf6", hoverText, isGB ? theme.textHex : "#8b5cf6", isGB, fontFam, isGB ? "10px" : "15px", true, "#8b5cf6");
+        setupButtonHover(restartBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#3b82f6", hoverText, isGB ? theme.textHex : "#3b82f6", isGB, fontFam, isGB ? "10px" : "15px", true, "#3b82f6");
+        setupButtonHover(leaveBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#ef4444", hoverText, isGB ? theme.textHex : "#ef4444", isGB, fontFam, isGB ? "10px" : "15px", true, "#ef4444");
 
         rulesBtn.setOnAction(e -> {
             SoundManager.playMenuSelect();
