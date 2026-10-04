@@ -30,6 +30,8 @@ This repository contains the complete codebase, launch scripts, font assets, tec
 * **Audio Controls & Procedural Synth:** 8-bit dynamic runtime synthesizer with master volume slider and instant mute toggle (`[M]`).
 * **Tutorial Overlay Visual Guides:** Interactive, step-by-step animated previews for all five algorithms to help players learn the mechanics before starting.
 * **Practice Mode:** Train with zero timer pressure or penalty calculations.
+* **Colorblind Accessibility & Symbol Mode:** Toggleable (`[V]`) shape signifiers (`[✓]` checkmark pills for sorted blocks, `★` stars for pivots, `▲` chevrons for merge heads) and high-contrast text outlines for universal legibility across all vision types and displays.
+* **In-Game Algorithm Rulebook:** Instant reference card available directly inside the Pause Menu (`[ESC]`) explaining mechanics, indicators, and pro-tips on the fly without abandoning current match progress.
 * **Combo Multiplier & Fever Mode:** Stack consecutive correct moves to trigger score multipliers and pulsing visual indicators. Reaching 5+ combo unlocks **Fever Mode** with double points ($2\times$), glowing chromatic neon borders, edge sparks, and ascending pentatonic chimes.
 * **Elastic Landing Bounce:** Blocks settling into destination slots apply organic squash-and-stretch spring physics for tactile mechanical snap.
 * **Juicy Vector Particle Engine:** Custom physics particle bursts erupting on correct/incorrect actions, plus falling confetti cascades on wave completion.
@@ -161,11 +163,12 @@ Sort Pulse supports both full keyboard controls and direct mouse interactions:
 | `D` / `→` | Move Selection Cursor Right | Navigate to Next Slide / Start Game |
 | `ENTER` / `SPACE` | Execute Shift / Swap Action | Start Game (on final slide) |
 | `Z` | Undo last move (Practice Mode step-back) | — |
+| `V` | Toggle Colorblind Accessibility Symbols & Outlines | — |
 | **Mouse Hover** | Highlight block under cursor with soft glow | — |
 | **Mouse Left-Click** | Click block to select; click selected block to execute | Click navigation buttons |
 | `M` | Toggle Audio Mute / Unmute instantly | — |
 | `C` | Toggle Retro CRT Scanlines & Vignette | — |
-| `ESC` | Open Pause Menu (Volume, Mute, CRT, Restart, Leave) | Close Tutorial Overlay |
+| `ESC` | Open Pause Menu (Volume, Mute, CRT, Symbols, Rules, Restart, Leave) | Close Tutorial Overlay |
 | `R` | Restart current match/wave | — |
 
 ---

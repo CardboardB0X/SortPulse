@@ -989,6 +989,9 @@ public class ChromaCascadeApp extends Application {
         public void setEnteringInitials(boolean enteringInitials) { this.enteringInitials = enteringInitials; }
         public String getPlayerInitials() { return playerInitials; }
         public void setPlayerInitials(String playerInitials) { this.playerInitials = playerInitials; }
+        private boolean symbolAccessibilityMode = false;
+        public boolean isSymbolAccessibilityMode() { return symbolAccessibilityMode; }
+        public void setSymbolAccessibilityMode(boolean symbolAccessibilityMode) { this.symbolAccessibilityMode = symbolAccessibilityMode; }
     }
 
     // --- Custom Sorter Engine ---
@@ -1907,6 +1910,22 @@ public class ChromaCascadeApp extends Application {
                     gc.setLineWidth(isPivot || isHeadA || isHeadB ? 2.0 : 1.0);
                     gc.strokeRoundRect(rendX, rendY, rendW, rendH, 4, 4);
 
+                    // Accessibility checkmark pill for sorted elements
+                    if (isSorted && model.isSymbolAccessibilityMode()) {
+                        double checkW = 16.0;
+                        double checkH = 14.0;
+                        double checkX = rendX + 4;
+                        double checkY = rendY + 4;
+                        gc.setFill(isGameBoy ? theme.panelBg : Color.web("#0f172a", 0.85));
+                        gc.fillRoundRect(checkX, checkY, checkW, checkH, 3, 3);
+                        gc.setStroke(theme.sorted);
+                        gc.setLineWidth(1.0);
+                        gc.strokeRoundRect(checkX, checkY, checkW, checkH, 3, 3);
+                        gc.setFill(theme.sorted);
+                        gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 9, isGameBoy));
+                        gc.fillText("✓", checkX + 3.5, checkY + 10.5);
+                    }
+
                     // Selection cursor highlight
                     if (i == model.getActiveSegmentCursor() && model.getFreezeFrames() <= 0) {
                         gc.setStroke(theme.accent);
@@ -1921,29 +1940,35 @@ public class ChromaCascadeApp extends Application {
 
                     // Draw Badges above blocks
                     if (isPivot) {
-                        double badgeW = Math.min(rendW, 42.0);
+                        String pivotText = model.isSymbolAccessibilityMode() ? "★ PIVOT" : "PIVOT";
+                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 52.0 : 42.0);
                         double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(Color.web("#ea580c"));
                         gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
                         gc.setFill(Color.WHITE);
                         gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        gc.fillText("PIVOT", badgeX + (badgeW - 25) / 2.0, rendY - 8);
+                        double ptOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 25) / 2.0;
+                        gc.fillText(pivotText, badgeX + ptOffset, rendY - 8);
                     } else if (isHeadA) {
-                        double badgeW = Math.min(rendW, 42.0);
+                        String headText = model.isSymbolAccessibilityMode() ? "▲ HEAD A" : "HEAD A";
+                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 54.0 : 42.0);
                         double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(theme.accent);
                         gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
                         gc.setFill(Color.WHITE);
                         gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        gc.fillText("HEAD A", badgeX + (badgeW - 30) / 2.0, rendY - 8);
+                        double htOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 30) / 2.0;
+                        gc.fillText(headText, badgeX + htOffset, rendY - 8);
                     } else if (isHeadB) {
-                        double badgeW = Math.min(rendW, 42.0);
+                        String headText = model.isSymbolAccessibilityMode() ? "▲ HEAD B" : "HEAD B";
+                        double badgeW = Math.min(rendW, model.isSymbolAccessibilityMode() ? 54.0 : 42.0);
                         double badgeX = rendX + (rendW - badgeW) / 2.0;
                         gc.setFill(theme.accent);
                         gc.fillRoundRect(badgeX, rendY - 17, badgeW, 13, 3, 3);
                         gc.setFill(Color.WHITE);
                         gc.setFont(getThemeFont("Segoe UI", FontWeight.BOLD, 8, isGameBoy));
-                        gc.fillText("HEAD B", badgeX + (badgeW - 30) / 2.0, rendY - 8);
+                        double htOffset = model.isSymbolAccessibilityMode() ? 4.0 : (badgeW - 30) / 2.0;
+                        gc.fillText(headText, badgeX + htOffset, rendY - 8);
                     }
 
                     // Centered raw integer value
@@ -1952,6 +1977,11 @@ public class ChromaCascadeApp extends Application {
                     String valStr = String.valueOf(segment.getRawValue());
                     double charWidth = isGameBoy ? 12.0 : 10.0;
                     double textWidth = charWidth * valStr.length();
+                    if (model.isSymbolAccessibilityMode()) {
+                        gc.setStroke(isGameBoy ? theme.bg : Color.web("#050811"));
+                        gc.setLineWidth(2.5);
+                        gc.strokeText(valStr, rendX + (rendW - textWidth) / 2.0, rendY + 46);
+                    }
                     gc.fillText(valStr, rendX + (rendW - textWidth) / 2.0, rendY + 46);
 
                     // Weight detail
@@ -2560,6 +2590,14 @@ public class ChromaCascadeApp extends Application {
                     }
                     break;
 
+                case V:
+                    boolean curSymbols = model.isSymbolAccessibilityMode();
+                    model.setSymbolAccessibilityMode(!curSymbols);
+                    SoundManager.playClick();
+                    view.spawnFloatingText(view.getCanvas().getWidth() / 2, view.getCanvas().getHeight() / 2 - 20, 
+                        !curSymbols ? "ACCESSIBILITY SYMBOLS: ON" : "ACCESSIBILITY SYMBOLS: OFF", Color.web("#10b981"));
+                    break;
+
                 default:
                     break;
             }
@@ -3068,11 +3106,18 @@ public class ChromaCascadeApp extends Application {
             view.setCrtEnabled(newVal);
         });
 
+        CheckBox symbolsCb = new CheckBox("SYMBOLS [V]");
+        symbolsCb.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;");
+        symbolsCb.setSelected(model.isSymbolAccessibilityMode());
+        symbolsCb.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            model.setSymbolAccessibilityMode(newVal);
+        });
+
         Label volLabel = new Label("VOL:");
         volLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 12px;");
 
         Slider volSlider = new Slider(0, 100, SoundManager.getMasterVolume() * 100);
-        volSlider.setPrefWidth(90);
+        volSlider.setPrefWidth(85);
         volSlider.setStyle("-fx-cursor: hand;");
         volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             SoundManager.setMasterVolume(newVal.doubleValue() / 100.0);
@@ -3085,7 +3130,7 @@ public class ChromaCascadeApp extends Application {
             SoundManager.setMuted(newVal);
         });
 
-        settingsRow.getChildren().addAll(crtCb, volLabel, volSlider, muteCb);
+        settingsRow.getChildren().addAll(crtCb, symbolsCb, volLabel, volSlider, muteCb);
 
         Button leaderboardBtn = new Button("HIGH SCORES");
         leaderboardBtn.setStyle("-fx-background-color: #1e293b; -fx-text-fill: #f8fafc; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12px 30px; -fx-background-radius: 6px; -fx-border-color: #334155; -fx-border-width: 1px; -fx-border-radius: 6px; -fx-min-width: 280; -fx-cursor: hand;");
@@ -3249,7 +3294,7 @@ public class ChromaCascadeApp extends Application {
         HBox controlsBar = new HBox();
         controlsBar.setPadding(new Insets(10));
         controlsBar.setAlignment(Pos.CENTER);
-        Text controlGuide = new Text("CONTROLS: [A/←] [D/→] or Click Block | [ENTER/SPACE] Shift | [Z] Undo (Practice) | [M] Mute | [C] CRT | [R] Restart | [ESC] Pause");
+        Text controlGuide = new Text("CONTROLS: [A/←] [D/→] or Click Block | [ENTER/SPACE] Shift | [Z] Undo | [V] Symbols | [M] Mute | [C] CRT | [R] Restart | [ESC] Pause");
         controlGuide.setFill(Color.web("#64748b"));
         controlGuide.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-style: italic; -fx-font-size: 11px;");
         controlsBar.getChildren().add(controlGuide);
@@ -6051,7 +6096,7 @@ public class ChromaCascadeApp extends Application {
         VBox card = new VBox(20);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(25, 35, 25, 35));
-        card.setMaxWidth(460);
+        card.setMaxWidth(520);
         card.setStyle("-fx-background-color: " + theme.panelBgHex + 
                       "; -fx-border-color: " + theme.borderHex + 
                       "; -fx-border-width: 2px; -fx-background-radius: 8px; -fx-border-radius: 8px;");
@@ -6071,20 +6116,20 @@ public class ChromaCascadeApp extends Application {
         String hoverText = isGB ? theme.bgHex : "#ffffff";
         String hoverBorder = isGB ? theme.textHex : theme.accentHex;
 
-        // Quick Settings: Volume & CRT
+        // Quick Settings: Volume, Mute, CRT, and Symbols
         VBox settingsCard = new VBox(8);
         settingsCard.setAlignment(Pos.CENTER);
         settingsCard.setPadding(new Insets(10));
         settingsCard.setStyle("-fx-background-color: " + (isGB ? "rgba(139,172,15,0.15)" : "rgba(30,41,59,0.5)") + "; -fx-background-radius: 6px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1px; -fx-border-radius: 6px;");
 
-        HBox volRow = new HBox(10);
+        HBox volRow = new HBox(8);
         volRow.setAlignment(Pos.CENTER);
         int curVolPct = (int) Math.round(SoundManager.getMasterVolume() * 100);
         Label volLabel = new Label("VOL: " + curVolPct + "%");
         volLabel.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "7px" : "11px") + "; -fx-text-fill: " + theme.textHex + "; -fx-font-weight: bold;");
 
         Slider volSlider = new Slider(0, 100, curVolPct);
-        volSlider.setPrefWidth(100);
+        volSlider.setPrefWidth(80);
         volSlider.setStyle("-fx-cursor: hand;");
         volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             int p = newVal.intValue();
@@ -6094,9 +6139,11 @@ public class ChromaCascadeApp extends Application {
 
         Button muteBtn = new Button(SoundManager.isMuted() ? "UNMUTE" : "MUTE");
         Button crtBtn = new Button(view.isCrtEnabled() ? "CRT: ON" : "CRT: OFF");
+        Button symbolsBtn = new Button(model.isSymbolAccessibilityMode() ? "SYMBOLS: ON" : "SYMBOLS: OFF");
 
         setupButtonHover(muteBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#f59e0b", hoverText, isGB ? theme.textHex : "#f59e0b", isGB, fontFam, isGB ? "7px" : "10px", false, "#f59e0b");
         setupButtonHover(crtBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#06b6d4", hoverText, isGB ? theme.textHex : "#06b6d4", isGB, fontFam, isGB ? "7px" : "10px", false, "#06b6d4");
+        setupButtonHover(symbolsBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#10b981", hoverText, isGB ? theme.textHex : "#10b981", isGB, fontFam, isGB ? "7px" : "10px", false, "#10b981");
 
         muteBtn.setOnAction(e -> {
             SoundManager.toggleMute();
@@ -6108,19 +6155,91 @@ public class ChromaCascadeApp extends Application {
             crtBtn.setText(view.isCrtEnabled() ? "CRT: ON" : "CRT: OFF");
         });
 
-        volRow.getChildren().addAll(volLabel, volSlider, muteBtn, crtBtn);
+        symbolsBtn.setOnAction(e -> {
+            model.setSymbolAccessibilityMode(!model.isSymbolAccessibilityMode());
+            symbolsBtn.setText(model.isSymbolAccessibilityMode() ? "SYMBOLS: ON" : "SYMBOLS: OFF");
+            SoundManager.playClick();
+        });
+
+        volRow.getChildren().addAll(volLabel, volSlider, muteBtn, crtBtn, symbolsBtn);
         settingsCard.getChildren().add(volRow);
 
         VBox buttonContainer = new VBox(15);
         buttonContainer.setAlignment(Pos.CENTER);
 
         Button resumeBtn = new Button("RESUME");
+        Button rulesBtn = new Button("HOW TO PLAY / RULES");
         Button restartBtn = new Button("RESTART");
         Button leaveBtn = new Button("LEAVE");
 
         setupButtonHover(resumeBtn, normalBg, normalText, normalBorder, hoverBg, hoverText, hoverBorder, isGB, fontFam, isGB ? "9px" : "14px", true, theme.accentHex);
+        setupButtonHover(rulesBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#8b5cf6", hoverText, isGB ? theme.textHex : "#8b5cf6", isGB, fontFam, isGB ? "9px" : "14px", true, "#8b5cf6");
         setupButtonHover(restartBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#3b82f6", hoverText, isGB ? theme.textHex : "#3b82f6", isGB, fontFam, isGB ? "9px" : "14px", true, "#3b82f6");
         setupButtonHover(leaveBtn, normalBg, normalText, normalBorder, isGB ? theme.textHex : "#ef4444", hoverText, isGB ? theme.textHex : "#ef4444", isGB, fontFam, isGB ? "9px" : "14px", true, "#ef4444");
+
+        rulesBtn.setOnAction(e -> {
+            SoundManager.playMenuSelect();
+            buttonContainer.getChildren().clear();
+
+            String algo = model.getTargetAlgorithm();
+            String ruleTitleText = algo.toUpperCase() + " RULES & STRATEGY";
+            String ruleDescText;
+            String indicatorText;
+            String shortcutTip;
+
+            if (algo.equalsIgnoreCase("Selection Sort")) {
+                ruleDescText = "• Objective: Move smallest unsorted block to front.\n• Action: Move cursor to MINIMUM block in grey area, press [ENTER] to lock it green.";
+                indicatorText = "• Indicators: Dashed box marks unsorted subarray. Snap cursor guides to next slot.";
+                shortcutTip = "• Tip: Use decimal weights underneath blocks for faster comparison.";
+            } else if (algo.equalsIgnoreCase("Bubble Sort")) {
+                ruleDescText = "• Objective: Bubble larger values to the right by comparing adjacent pairs.\n• Action: If left element > right element, press [ENTER] to swap. Otherwise press [D] to step forward.";
+                indicatorText = "• Indicators: Active partition is bordered. Blocks lock green at the far right.";
+                shortcutTip = "• Tip: Cursor does not snap automatically; traverse manually using [A] / [D].";
+            } else if (algo.equalsIgnoreCase("Insertion Sort")) {
+                ruleDescText = "• Objective: Insert each unsorted element into its sorted left sub-list.\n• Action: Shift active element leftward with [ENTER] until left neighbor is smaller. Press [D] to advance.";
+                indicatorText = "• Indicators: Sorted subsegment on the left; active element highlighted.";
+                shortcutTip = "• Tip: Keep pressing [ENTER] as long as the element to your left is larger.";
+            } else if (algo.equalsIgnoreCase("Quick Sort")) {
+                ruleDescText = "• Objective: Partition values around the PIVOT element.\n• Action: If block <= PIVOT, press [ENTER] to swap into TARGET SLOT. Finally shift PIVOT.";
+                indicatorText = "• Indicators: Orange badge marks PIVOT; '<' or '>' badge compares cursor to pivot.";
+                shortcutTip = "• Tip: Follow the gold TARGET SLOT arrow pointing to where the partition boundary lies.";
+            } else { // Merge Sort
+                ruleDescText = "• Objective: Merge two pre-sorted subarrays into a single sorted array.\n• Action: Compare HEAD A and HEAD B (cyan badges). Press [ENTER] on the smaller head.";
+                indicatorText = "• Indicators: Upper level contains Subarray A & B; lower level is the merged output.";
+                shortcutTip = "• Tip: Look for cyan badges to instantly locate the two heads to compare.";
+            }
+
+            Label ruleTitle = new Label(ruleTitleText);
+            ruleTitle.setStyle("-fx-font-family: " + fontFam + "; -fx-font-size: " + (isGB ? "8px" : "12px") + "; -fx-font-weight: bold; -fx-text-fill: " + theme.accentHex + "; -fx-text-alignment: center;");
+
+            VBox ruleBox = new VBox(6);
+            ruleBox.setPadding(new Insets(10));
+            ruleBox.setMaxWidth(460);
+            ruleBox.setStyle("-fx-background-color: " + (isGB ? "rgba(139,172,15,0.15)" : "rgba(30,41,59,0.5)") + "; -fx-background-radius: 6px; -fx-border-color: " + theme.borderHex + "; -fx-border-width: 1px;");
+
+            Label r1 = new Label(ruleDescText);
+            Label r2 = new Label(indicatorText);
+            Label r3 = new Label(shortcutTip);
+            Label rControls = new Label("SHORTCUTS: [A/←] [D/→] Move | [ENTER/SPACE] Shift | [Z] Undo | [V] Symbols");
+
+            String ruleStyle = "-fx-font-family: " + (isGB && isCustomFontLoaded ? "'Press Start 2P'" : "'Segoe UI', sans-serif") + "; -fx-font-size: " + (isGB ? "7px" : "11px") + "; -fx-text-fill: " + theme.textHex + ";";
+            r1.setStyle(ruleStyle); r1.setWrapText(true);
+            r2.setStyle(ruleStyle); r2.setWrapText(true);
+            r3.setStyle(ruleStyle + " -fx-font-style: italic; -fx-text-fill: " + theme.textMutedHex + ";"); r3.setWrapText(true);
+            rControls.setStyle("-fx-font-family: " + (isGB && isCustomFontLoaded ? "'Press Start 2P'" : "'Consolas', monospace") + "; -fx-font-size: " + (isGB ? "6px" : "10px") + "; -fx-text-fill: " + theme.sortedHex + "; -fx-font-weight: bold;"); rControls.setWrapText(true);
+
+            ruleBox.getChildren().addAll(ruleTitle, r1, r2, r3, rControls);
+
+            Button backPauseBtn = new Button("BACK TO PAUSE");
+            setupButtonHover(backPauseBtn, normalBg, normalText, normalBorder, hoverBg, hoverText, hoverBorder, isGB, fontFam, isGB ? "9px" : "13px", true, theme.accentHex);
+            backPauseBtn.setOnAction(b -> {
+                SoundManager.playMenuSelect();
+                buttonContainer.getChildren().clear();
+                buttonContainer.getChildren().addAll(resumeBtn, rulesBtn, restartBtn, leaveBtn);
+            });
+
+            buttonContainer.getChildren().addAll(ruleBox, backPauseBtn);
+        });
 
         resumeBtn.setOnAction(e -> {
             SoundManager.playMenuSelect();
@@ -6167,14 +6286,14 @@ public class ChromaCascadeApp extends Application {
                 SoundManager.playMenuSelect();
                 // Restore normal button view
                 buttonContainer.getChildren().clear();
-                buttonContainer.getChildren().addAll(resumeBtn, restartBtn, leaveBtn);
+                buttonContainer.getChildren().addAll(resumeBtn, rulesBtn, restartBtn, leaveBtn);
             });
 
             confirmButtons.getChildren().addAll(yesBtn, noBtn);
             buttonContainer.getChildren().addAll(confirmLabel, confirmButtons);
         });
 
-        buttonContainer.getChildren().addAll(resumeBtn, restartBtn, leaveBtn);
+        buttonContainer.getChildren().addAll(resumeBtn, rulesBtn, restartBtn, leaveBtn);
         card.getChildren().addAll(pauseTitle, settingsCard, buttonContainer);
         overlay.getChildren().add(card);
 
