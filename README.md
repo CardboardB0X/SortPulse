@@ -2,7 +2,21 @@
 
 **Sort Pulse** is an intense, timed arcade puzzle game and interactive algorithm trainer. Players race against the clock to sort randomized block grids using real-world sorting algorithms: **Selection Sort**, **Bubble Sort**, **Insertion Sort**, **Quick Sort**, and **Merge Sort**.
 
-This repository contains the complete codebase, launch scripts, font assets, and packaging utilities to run the game as a standalone native desktop application.
+This repository contains the complete codebase, launch scripts, font assets, technical documentation, and packaging utilities to run the game as a standalone native desktop application.
+
+<p align="center">
+  <img src="classic_neon_gameplay.png" alt="Classic Neon Mode" width="49%" />
+  <img src="gameboy_retro_gameplay.png" alt="GameBoy Retro Mode" width="49%" />
+</p>
+
+---
+
+## 📚 Technical Documentation & Resources
+
+* 📄 **[Technical Documentation (Markdown)](DOCUMENTATION.md)**: Full design specifications, MVC architecture, sorting algorithms analysis, complexity charts, and individual reflection.
+* 🌐 **[Print-Ready Documentation (HTML)](DOCUMENTATION.html)**: Clean, paginated 8-page formatted report with code snippets, diagrams, and print styles.
+* 📱 **[Android & Kotlin Migration Guide](ANDROID_MIGRATION_GUIDE.md)**: Architectural blueprint for porting the game to Android using Jetpack Compose and Coroutines.
+* 🖼️ **[Screenshot Gallery](screenshots/)**: Collection of 30 in-game screenshots covering all tutorials, game modes, pause menus, and themes.
 
 ---
 

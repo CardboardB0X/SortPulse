@@ -2417,7 +2417,21 @@ public class ChromaCascadeApp extends Application {
 
     // --- Leaderboard Manager ---
     public static class LeaderboardManager {
-        private static final String FILE_NAME = "sort_pulse_scores.txt";
+        private static final String FILE_NAME;
+        static {
+            String path = "sort_pulse_scores.txt";
+            try {
+                String userHome = System.getProperty("user.home");
+                java.io.File dir = new java.io.File(userHome, ".sortpulse");
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                path = new java.io.File(dir, "sort_pulse_scores.txt").getAbsolutePath();
+            } catch (Exception e) {
+                // Fallback to current working directory
+            }
+            FILE_NAME = path;
+        }
 
         public static class Entry {
             public String mode;
@@ -2437,12 +2451,37 @@ public class ChromaCascadeApp extends Application {
             java.util.List<Entry> entries = new java.util.ArrayList<>();
             java.io.File file = new java.io.File(FILE_NAME);
             if (!file.exists()) {
-                entries.add(new Entry("Selection Sort", "ALAN", 500, "2026-06-06"));
-                entries.add(new Entry("Selection Sort", "ADA", 400, "2026-06-06"));
-                entries.add(new Entry("Quick Sort", "GRACE", 800, "2026-06-06"));
-                entries.add(new Entry("Quick Sort", "LINUS", 600, "2026-06-06"));
-                entries.add(new Entry("Merge Sort", "DONALD", 1000, "2026-06-06"));
-                entries.add(new Entry("Merge Sort", "TIM", 700, "2026-06-06"));
+                // Backward compatibility: Import existing local score file if present
+                java.io.File localFile = new java.io.File("sort_pulse_scores.txt");
+                if (localFile.exists()) {
+                    try {
+                        java.nio.file.Files.copy(localFile.toPath(), file.toPath());
+                    } catch (Exception e) {
+                        file = localFile;
+                    }
+                }
+            }
+            if (!file.exists()) {
+                // Selection Sort
+                entries.add(new Entry("Selection Sort", "MIC", 500, "2026-06-11"));
+                entries.add(new Entry("Selection Sort", "RON", 400, "2026-06-11"));
+                entries.add(new Entry("Selection Sort", "SHL", 300, "2026-06-11"));
+                // Bubble Sort
+                entries.add(new Entry("Bubble Sort", "MIC", 500, "2026-06-11"));
+                entries.add(new Entry("Bubble Sort", "RON", 400, "2026-06-11"));
+                entries.add(new Entry("Bubble Sort", "SHL", 300, "2026-06-11"));
+                // Insertion Sort
+                entries.add(new Entry("Insertion Sort", "MIC", 500, "2026-06-11"));
+                entries.add(new Entry("Insertion Sort", "RON", 400, "2026-06-11"));
+                entries.add(new Entry("Insertion Sort", "SHL", 300, "2026-06-11"));
+                // Quick Sort
+                entries.add(new Entry("Quick Sort", "MIC", 800, "2026-06-11"));
+                entries.add(new Entry("Quick Sort", "RON", 600, "2026-06-11"));
+                entries.add(new Entry("Quick Sort", "SHL", 400, "2026-06-11"));
+                // Merge Sort
+                entries.add(new Entry("Merge Sort", "MIC", 1000, "2026-06-11"));
+                entries.add(new Entry("Merge Sort", "RON", 700, "2026-06-11"));
+                entries.add(new Entry("Merge Sort", "SHL", 500, "2026-06-11"));
                 saveEntries(entries);
                 return entries;
             }

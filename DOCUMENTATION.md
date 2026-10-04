@@ -479,10 +479,13 @@ The dual-aesthetic design of **Sort Pulse** allows players to customize their vi
 
 1. **Classic Neon Theme (Default):**
    * Features a vibrant, high-contrast dark interface suitable for modern gaming environments.
-   * File reference: [classic_neon_gameplay.png](file:///c:/Users/Japoy/OneDrive/Documents/SORTING%20ALGORITHM%20GAME/classic_neon_gameplay.png)
+   
+   ![Classic Neon Theme](classic_neon_gameplay.png)
+
 2. **GameBoy Retro Theme:**
    * Simulates a classic DMG LCD screen with desaturated green and olive tones, catering to a retro arcade aesthetic.
-   * File reference: [gameboy_retro_gameplay.png](file:///c:/Users/Japoy/OneDrive/Documents/SORTING%20ALGORITHM%20GAME/gameboy_retro_gameplay.png)
+   
+   ![GameBoy Retro Theme](gameboy_retro_gameplay.png)
 
 ### Discussion of How the Program Achieves Its Objectives
 The combination of game mechanics, visual indicators, and real-time audio feedback successfully achieves the goal of teaching sorting algorithms:
@@ -513,3 +516,41 @@ The combination of game mechanics, visual indicators, and real-time audio feedba
 2. **Visual Algorithm Customizer:** Allow developers to write custom sorting algorithms in an in-game editor and automatically compile them into playable game modes.
 3. **Advanced Visualizations:** Implement additional data structures, such as Heaps or Binary Trees, to expand the game's educational scope.
 4. **Mobile Deployment:** Port the game to Android and iOS using Gluon Mobile, making it accessible to students on mobile devices.
+
+---
+
+## 8. Individual Reflection
+
+### Group Member: Japoy (Lead Software & Game Developer)
+
+#### Assigned Role and Responsibilities
+In this project, I served as the **Lead Software Engineer and Game Mechanics Designer**. My primary responsibilities encompassed:
+*   **System Architecture:** Designing and setting up the Model-View-Controller (MVC) pattern to separate raw data logic, canvas rendering loops, and user input validation.
+*   **Engine Development:** Developing the 60 FPS visual rendering engine on JavaFX's `2D Canvas` and creating the custom procedural audio synthesizer.
+*   **Algorithmic Integration:** Implementing the theoretical tracing algorithms that record every partition, pivot, comparison, and swap step to validate player keystrokes.
+*   **Build Pipeline Configuration:** Setting up the native desktop deployment scripts (`run.bat`, `package.bat`) using `jlink` and `jpackage` to bundle a custom JRE and JavaFX runtime.
+
+#### Contributions Made During Development
+My key technical contributions to the project included:
+*   **Algorithmic Tracer (`GridSorter`):** Wrote sorting step simulators for Selection, Bubble, Insertion, Lomuto Quick, and double-level Merge Sort, ensuring the system pre-computes valid state lists (`List<SortingStep>`) before each gameplay round.
+*   **Procedural Synth (`SoundManager`):** Configured a low-latency thread using standard Java audio mixers (`javax.sound.sampled`) that synthesizes 8-bit sound effects (chimes, buzzes) and dynamic arpeggios on-the-fly, scaling the background music tempo under time pressure.
+*   **Interpolated Rendering Loop (`ChromaCascadeView`):** Programmed coordinate interpolation mapping (`visualXMap`, `visualYMap`) with a $22\%$ frame-to-frame velocity multiplier to create smooth block slide animations.
+*   **Theme Engine & UI Polish:** Designed and implemented the dark-mode **Classic Neon** theme and the monochrome **GameBoy Retro** theme, overriding JavaFX font antialiasing with grayscale subpixel rendering to maintain pixel-art font crispness.
+
+#### Challenges Encountered and Resolutions
+*   **Visual-Model Desynchronization:** During fast keyboard inputs, the visual block maps would occasionally lag behind model array modifications, causing index mismatch crashes.
+    *   *Resolution:* I implemented a **Safety Overflow Stack** in `PuzzleRow` to temporarily hold out-of-bounds segments, combined with a synchronized lock on input evaluation events to prevent concurrent modification exceptions.
+*   **Audio Thread Jitter and Latency:** Running standard file-based clip players (`.wav` or `.mp3`) resulted in significant lag when playing multiple simultaneous collision and success sounds.
+    *   *Resolution:* I bypassed traditional clip player libraries entirely. I engineered a dedicated mixer thread running a continuous sample writing loop into a single `SourceDataLine` buffer, mixing multiple wave channels using simple phase additions and exponential decay envelopes.
+*   **Hi-DPI Scaling Blur:** Pixel-art fonts loaded in JavaFX often became fuzzy or blurred on high-resolution Windows screens.
+    *   *Resolution:* Overrode the scaling behaviors by enforcing integer-point font sizes, and disabled standard subpixel anti-aliasing in retro theme modes to force crisp pixel alignment.
+
+#### Knowledge and Skills Gained
+*   **Data Structures:** Gained practical knowledge of managing polymorphic arrays (`BlockSegment[]`) containing mixed subclass elements, and handling flat-file data persistence for local leaderboard storage.
+*   **Algorithms:** Dissecting five distinct sorting algorithms to write step-by-step state loggers deepened my understanding of partition boundaries, comparison heads, and shifting pointers.
+*   **Object-Oriented Programming (OOP):** Applied core OOP principles in a real-world system: encapsulating game metrics in `ChromaCascadeModel`, abstracting block structures via `BlockSegment`, inheriting lifecycle hooks from JavaFX `Application`, and using runtime polymorphism to calculate and display sort weights dynamically.
+*   **Iterative Prototyping & Profiling:** Learned to rigorously test and optimize rendering and sound loops, verifying mathematical phase synthesis formulas, bench-testing frame-rate stability, and systematically debugging complex array swap traces.
+
+#### Personal Insights and Lessons Learned
+*   **Architectural Cleanliness Pays Off:** Decoupling the game state from the rendering canvas using the MVC pattern was crucial. It allowed me to introduce new UI themes and practice modes without risking regression errors in the core algorithm evaluation code.
+*   **UX/UI Matters in Educational Software:** Designing interactive tutorial slides and the stress-free Practice Mode proved that educational tools need more than just accurate logic—they require game flow mechanics that accommodate different learning paces to be truly effective.

@@ -564,5 +564,25 @@ rightSum += sampleVal * rightFactor;</pre>
         <div class="page-footer">Page 7</div>
     </div>
 
+    <!-- PAGE 8: INDIVIDUAL REFLECTION -->
+    <div class="page">
+        <div class="page-content">
+            <h2>8. Individual Reflection</h2>
+            
+            <h3>Group Member: Japoy (Lead Software & Game Developer)</h3>
+            
+            <p><strong>Assigned Role and Responsibilities:</strong> In this project, I served as the Lead Software Engineer and Game Mechanics Designer. My primary responsibilities encompassed designing and setting up the Model-View-Controller (MVC) architecture, developing the 60 FPS rendering engine on the JavaFX 2D Canvas, implementing the custom procedural audio synthesizer, coding the theoretical sorting step tracers, and configuring the native desktop packaging pipeline (jlink/jpackage) for deployment.</p>
+            
+            <p><strong>Contributions Made During Development:</strong> My technical contributions included writing the step simulators in <code>GridSorter</code> for Selection, Bubble, Insertion, Quick, and Merge Sort. I engineered the low-latency <code>SoundManager</code> mixer thread that generates 8-bit sound effects and dynamic tempo-scaled arpeggios on-the-fly. I also developed the coordinate interpolation rendering loop to achieve smooth 60 FPS block animations and built the dual-theme visual engine (Classic Neon and GameBoy Retro) with custom subpixel anti-aliasing overrides.</p>
+            
+            <p><strong>Challenges Encountered and Resolutions:</strong> During fast user inputs, the visual block maps lagged behind the model, causing desynchronization. I solved this by implementing a Safety Overflow Stack in <code>PuzzleRow</code> and synchronizing input events. Standard Java audio clips also had high latency, which I resolved by writing a custom sample mixing loop to write raw byte buffers directly to a low-latency <code>SourceDataLine</code>. Finally, high-DPI scaling blur was corrected by enforcing integer-point fonts and disabling subpixel anti-aliasing in retro mode.</p>
+            
+            <p><strong>Knowledge and Skills Gained:</strong> I gained deep practical mastery of arrays and array lists by implementing them under rigid visual constraints, and handled flat-file serialization database systems. Dissecting five distinct sorting algorithms to write step-by-step state loggers deepened my understanding of partition boundaries and shifting pointers. I applied core OOP principles (Encapsulation, Abstraction, Inheritance, and Polymorphism) in a concrete system, and strengthened iterative testing habits to verify mathematical formulas, ensure 60 FPS frame stability, and debug complex array swaps.</p>
+            
+            <p><strong>Personal Insights and Lessons Learned:</strong> I realized that decoupling systems using the MVC pattern was crucial, as it allowed me to introduce new UI themes and practice modes with zero regression in core algorithm validation code. Furthermore, designing interactive tutorial slides and the stress-free Practice Mode proved that educational tools need more than just accurate logic—they require game flow mechanics that accommodate different learning paces to be truly effective.</p>
+        </div>
+        <div class="page-footer">Page 8</div>
+    </div>
+
 </body>
 </html>
